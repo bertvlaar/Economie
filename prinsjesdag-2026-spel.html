@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Het koffertje: jij bent minister van Financiën</title>
+<style>
+  :root {
+    --inkt: #16324F;
+    --inkt-licht: #2C4F72;
+    --koffer: #8C5A1E;
+    --koffer-licht: #B7803F;
+    --staatsrood: #9C3B34;
+    --perkament: #F2EEE3;
+    --perkament-donker: #E8E1D0;
+    --tekst: #211C15;
+    --goed: #3F6E4A;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--perkament);
+    color: var(--tekst);
+    font-family: -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.55;
+  }
+  h1, h2, h3 { font-family: Georgia, "Iowan Old Style", "Times New Roman", serif; }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 28px 20px 60px; }
+
+  header.top {
+    border-bottom: 2px solid var(--inkt);
+    padding: 22px 20px 16px;
+  }
+  header.top .wrap { padding: 0; }
+  header.top .sub { font-size: 0.85rem; color: #6b6455; margin: 0 0 4px; }
+  header.top h1 { font-size: clamp(1.4rem, 4.5vw, 1.9rem); color: var(--inkt); margin: 0; }
+
+  .scherm { display: none; animation: fadein 0.35s ease; }
+  .scherm.actief { display: block; }
+  @keyframes fadein { from { opacity: 0; transform: translateY(6px);} to { opacity: 1; transform: none; } }
+
+  .kaart {
+    background: #fff;
+    border: 1px solid var(--perkament-donker);
+    border-radius: 6px;
+    padding: 22px 24px;
+    margin-top: 18px;
+  }
+
+  p { margin: 0 0 12px; }
+
+  button.actie {
+    background: var(--inkt);
+    color: #fff;
+    border: none;
+    padding: 12px 22px;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-family: inherit;
+    cursor: pointer;
+    margin-top: 6px;
+  }
+  button.actie:hover { background: var(--inkt-licht); }
+  button.actie:disabled { background: #b9b2a0; cursor: not-allowed; }
+  button.secundair {
+    background: transparent;
+    color: var(--inkt);
+    border: 1px solid var(--inkt);
+  }
+  button.secundair:hover { background: var(--perkament-donker); }
+
+  textarea {
+    width: 100%;
+    font-family: inherit;
+    font-size: 1rem;
+    border: 1px solid #C9C1AC;
+    border-radius: 4px;
+    padding: 10px 12px;
+    background: #FBF9F3;
+    resize: vertical;
+    min-height: 90px;
+    margin: 10px 0;
+  }
+
+  /* ---- Begroting-verdeling ---- */
+  .budget-rij {
+    display: grid;
+    grid-template-columns: 1fr 46px;
+    grid-template-rows: auto auto;
+    align-items: center;
+    column-gap: 12px;
+    margin: 14px 0;
+  }
+  .budget-rij label { grid-column: 1 / -1; font-weight: 600; font-size: 0.95rem; margin-bottom: 6px; }
+  .budget-rij input[type=range] { grid-column: 1; grid-row: 2; width: 100%; accent-color: var(--koffer); }
+  .budget-waarde { grid-column: 2; grid-row: 2; text-align: right; font-variant-numeric: tabular-nums; font-weight: 700; color: var(--koffer); }
+  .budget-totaal { margin-top: 16px; padding: 10px 14px; border-radius: 4px; font-weight: 700; background: var(--perkament-donker); }
+  .budget-totaal.ok { background: #E3EEE4; color: var(--goed); }
+
+  /* ---- HUD meters ---- */
+  .hud { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 18px 0; }
+  .meter-blok { background: #fff; border: 1px solid var(--perkament-donker); border-radius: 6px; padding: 10px 12px; }
+  .meter-blok .naam { font-size: 0.72rem; text-transform: none; color: #6b6455; margin-bottom: 4px; }
+  .meter-blok .balk-buiten { background: var(--perkament-donker); border-radius: 999px; height: 9px; overflow: hidden; }
+  .meter-blok .balk-binnen { height: 100%; border-radius: 999px; transition: width 0.5s ease, background 0.5s ease; }
+  .meter-blok .getal { font-size: 0.78rem; font-weight: 700; margin-top: 3px; color: var(--inkt); }
+
+  .voortgang { font-size: 0.82rem; color: var(--koffer); font-weight: 700; margin-bottom: 4px; }
+  .stappen { display: flex; gap: 6px; margin-bottom: 14px; }
+  .stappen .stap { flex: 1; height: 5px; border-radius: 999px; background: var(--perkament-donker); }
+  .stappen .stap.gedaan { background: var(--koffer); }
+  .stappen .stap.huidig { background: var(--koffer-licht); }
+
+  .keuze-knop {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: var(--perkament);
+    border: 1px solid var(--perkament-donker);
+    border-radius: 4px;
+    padding: 12px 16px;
+    margin: 10px 0;
+    cursor: pointer;
+    font-size: 0.98rem;
+    font-family: inherit;
+    color: var(--tekst);
+  }
+  .keuze-knop:hover { border-color: var(--koffer); background: #fff; }
+  .keuze-knop.gekozen { border-color: var(--koffer); background: #fff; box-shadow: inset 0 0 0 1px var(--koffer); font-weight: 600; }
+  .wissel-hint { font-size: 0.82rem; color: #6b6455; font-style: italic; margin: -2px 0 4px; }
+
+  .gevolg-vak {
+    margin-top: 14px;
+    padding: 12px 16px;
+    background: var(--perkament);
+    border-left: 4px solid var(--koffer);
+    border-radius: 0 4px 4px 0;
+    font-size: 0.95rem;
+  }
+  .krantenkop {
+    font-family: Georgia, serif;
+    font-style: italic;
+    font-weight: 700;
+    color: var(--inkt);
+    font-size: 1rem;
+    margin: 0 0 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--perkament-donker);
+  }
+  .effect-lijst { font-size: 0.82rem; color: #6b6455; margin-top: 6px; }
+  .effect-lijst span { margin-right: 12px; }
+  .effect-lijst .plus { color: var(--goed); font-weight: 700; }
+  .effect-lijst .min { color: var(--staatsrood); font-weight: 700; }
+
+  .trivia-kaart { background: var(--perkament); border: 1px dashed var(--koffer-licht); border-radius: 6px; padding: 18px 20px; margin-top: 18px; }
+  .trivia-kaart .label { font-size: 0.75rem; font-weight: 700; color: var(--koffer); margin-bottom: 6px; }
+
+  /* ---- Eindscherm ---- */
+  .titel-groot { font-size: 1.7rem; color: var(--inkt); margin: 4px 0 10px; }
+  .eind-emoji { font-size: 2.4rem; line-height: 1; }
+  .score-groot { font-size: 2.6rem; font-weight: 700; color: var(--koffer); font-family: Georgia, serif; }
+  .eind-meters { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 18px 0; }
+  .eind-meters .meter-blok .balk-buiten { height: 12px; }
+
+  .hoogste-melding { font-size: 0.85rem; color: var(--goed); margin-top: 6px; }
+
+  /* ---- Dossier-briefing ---- */
+  .dossier-kaart { position: relative; }
+  .dossier-stempel {
+    display: inline-block;
+    border: 2px solid var(--staatsrood);
+    color: var(--staatsrood);
+    font-weight: 700;
+    font-size: 0.7rem;
+    letter-spacing: 0.03em;
+    padding: 4px 10px;
+    border-radius: 4px;
+    transform: rotate(-2deg);
+    margin-bottom: 14px;
+  }
+  .dossier-emoji { font-size: 2.2rem; margin-bottom: 6px; }
+  .dossier-knoppen { display: flex; justify-content: space-between; margin-top: 18px; }
+  .docent-info {
+    margin-top: 16px;
+    font-size: 0.82rem;
+    color: #6b6455;
+    background: #fff;
+    border: 1px dashed var(--perkament-donker);
+    border-radius: 6px;
+    padding: 10px 14px;
+  }
+  .docent-info summary { cursor: pointer; font-weight: 700; color: var(--inkt); }
+  .docent-info p { margin: 8px 0 0; }
+
+  /* ---- Kamervraag ---- */
+  .kamer-kaart .label { color: var(--koffer); font-weight: 700; font-size: 0.85rem; margin-bottom: 4px; }
+  .kaart > .label { color: var(--koffer); font-weight: 700; font-size: 0.85rem; margin-bottom: 4px; display: block; }
+  #kamervraag-opties .keuze-knop.goed { border-color: var(--goed); background: #E3EEE4; }
+  #kamervraag-opties .keuze-knop.fout { border-color: var(--staatsrood); background: #F3E1DE; }
+
+  /* ---- Regeerakkoord recap ---- */
+  .regeerakkoord-lijst { list-style: none; padding: 0; margin: 8px 0 16px; }
+  .regeerakkoord-lijst li {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--perkament-donker);
+    font-size: 0.9rem;
+  }
+  .regeerakkoord-lijst li:last-child { border-bottom: none; }
+  .regeerakkoord-lijst b { color: var(--inkt); display: block; font-size: 0.82rem; }
+
+  .klas-vak {
+    background: var(--perkament);
+    border-left: 4px solid var(--inkt);
+    padding: 12px 16px;
+    border-radius: 0 4px 4px 0;
+    font-size: 0.9rem;
+    margin: 14px 0;
+  }
+  .grafiek-legenda { display: flex; gap: 18px; font-size: 0.8rem; color: #6b6455; margin: 6px 0 16px; }
+  .grafiek-legenda .stipje { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 5px; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <p class="sub">Economie · havo/vwo · spel bij de les Prinsjesdag</p>
+    <h1>Het koffertje: jij bent minister van Financiën</h1>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- SCHERM 0: DOSSIER-BRIEFING (carousel) -->
+  <section class="scherm actief" id="scherm-intro">
+    <div class="kaart dossier-kaart">
+      <div class="dossier-stempel">GEHEIM · ALLEEN VOOR DE NIEUWE MINISTER</div>
+      <div id="dossier-inhoud"></div>
+      <div class="stappen" id="dossier-stappen"></div>
+      <div class="dossier-knoppen">
+        <button class="actie secundair" id="btn-dossier-terug" style="visibility:hidden;">Vorige</button>
+        <button class="actie" id="btn-dossier-verder">Volgende</button>
+      </div>
+    </div>
+    <details class="docent-info">
+      <summary>ℹ️ Voor de docent</summary>
+      <p><b>Doel:</b> leerlingen ervaren aan den lijve dat overheidsbeleid draait om keuzes maken onder schaarste, en maken kennis met de kernbegrippen rond Prinsjesdag (Troonrede, Miljoenennota, Rijksbegroting, koffertje) en actuele coalitiethema's.</p>
+      <p><b>Tijdsindicatie:</b> zelfstandig spelen kost ongeveer 30 minuten. Reken nog 10 tot 15 minuten voor een klassikale nabespreking van de "regeerakkoorden", persberichten en scores.</p>
+      <p><b>Aansluiting op de les:</b> dit spel kan zelfstandig staan, of dienen als afsluiting/opening van de les over Prinsjesdag en de Rijksbegroting.</p>
+      <p><b>Nabespreektip:</b> laat een paar leerlingen hun eindtitel en "Jouw regeerakkoord" voorlezen. Vraag door op de lastigste beslissing: welk economisch begrip (schaarste, ruilvoet, afweging) hoort daarbij?</p>
+    </details>
+  </section>
+
+  <!-- SCHERM 1: BEGROTING VERDELEN -->
+  <section class="scherm" id="scherm-begroting">
+    <div class="kaart">
+      <h2>Stap 1: verdeel je startbegroting</h2>
+      <p>Je hebt <b>100 begrotingspunten</b> te verdelen over zes posten. Alles staat nu op 0: schuif zelf alles naar het totaal van 100. Hoe scherper je op een post bezuinigt, hoe kwetsbaarder je later bent als daar iets misgaat.</p>
+      <div id="budget-rijen"></div>
+      <div class="budget-totaal" id="budget-totaal">Totaal: 0 / 100</div>
+      <button class="actie" id="btn-naar-gebeurtenissen" disabled>Ga naar je eerste besluit</button>
+    </div>
+  </section>
+
+  <!-- SCHERM 2: GEBEURTENIS -->
+  <section class="scherm" id="scherm-gebeurtenis">
+    <div class="hud" id="hud"></div>
+    <div class="kaart">
+      <p class="voortgang" id="voortgang-tekst"></p>
+      <div class="stappen" id="stappen"></div>
+      <h2 id="gebeurtenis-titel"></h2>
+      <p id="gebeurtenis-tekst"></p>
+      <div id="keuzes-container"></div>
+      <p class="wissel-hint" id="wissel-hint" style="display:none;">Je kunt nog van keuze veranderen zolang je niet op "Volgende" klikt.</p>
+      <div class="gevolg-vak" id="gevolg-vak" style="display:none;">
+        <p class="krantenkop" id="krantenkop"></p>
+        <p id="gevolg-tekst" style="margin-bottom:6px;"></p>
+        <div class="effect-lijst" id="effect-lijst"></div>
+      </div>
+      <label class="q toelichting-label" id="toelichting-label" for="toelichting" style="display:none;">Licht in één zin toe waarom je dit besluit nam:</label>
+      <textarea id="toelichting" style="display:none; min-height:50px;" placeholder="Bijvoorbeeld: ik koos hiervoor omdat…"></textarea>
+      <p class="wissel-hint" id="toelichting-nudge" style="display:none; color:var(--staatsrood);">Vul nog even kort in waarom je dit koos, of klik nogmaals op "Volgende" om toch verder te gaan.</p>
+      <button class="actie" id="btn-volgende" style="display:none;">Volgende</button>
+    </div>
+  </section>
+
+  <!-- SCHERM 2b: TUSSENBALANS -->
+  <section class="scherm" id="scherm-tussenbalans">
+    <div class="hud" id="hud-tussenbalans"></div>
+    <div class="kaart">
+      <p class="label">⏸️ Tussenbalans</p>
+      <h2 id="tussenbalans-titel"></h2>
+      <p id="tussenbalans-tekst"></p>
+      <textarea id="tussenbalans-antwoord" placeholder="Typ hier je antwoord…"></textarea>
+      <button class="actie" id="btn-tussenbalans-verder">Verder als minister</button>
+    </div>
+  </section>
+
+  <!-- SCHERM 3: TRIVIA TUSSENDOOR -->
+  <section class="scherm" id="scherm-trivia">
+    <div class="trivia-kaart">
+      <p class="label">Tussendoortje</p>
+      <p id="trivia-tekst"></p>
+      <button class="actie" id="btn-trivia-verder">Verder</button>
+    </div>
+  </section>
+
+  <!-- SCHERM 3b: KAMERVRAAG (kennischeck) -->
+  <section class="scherm" id="scherm-kamervraag">
+    <div class="kaart kamer-kaart">
+      <p class="label">🎙️ Kamervraag</p>
+      <p id="kamervraag-tekst"></p>
+      <div id="kamervraag-opties"></div>
+      <div class="gevolg-vak" id="kamervraag-gevolg-vak" style="display:none;">
+        <p id="kamervraag-gevolg-tekst"></p>
+      </div>
+      <button class="actie" id="btn-kamervraag-verder" style="display:none;">Verder</button>
+    </div>
+  </section>
+
+  <!-- SCHERM 3c: PERSCONFERENTIE (reflectie) -->
+  <section class="scherm" id="scherm-pers">
+    <div class="kaart">
+      <p class="label">🎤 Persconferentie</p>
+      <h2>Een journalist steekt haar hand op</h2>
+      <p>"Minister, wat was voor u vandaag de lastigste beslissing, en waarom? En welke van uw eigen keuzes zou u, achteraf gezien, willen heroverwegen?"</p>
+      <textarea id="pers-antwoord" placeholder="Typ hier je antwoord… (tip: gebruik het woord 'schaarste' of 'afweging')"></textarea>
+
+      <p style="margin-top:18px;"><b>Tweede vraag, van een andere journalist:</b> "Kunt u in een kort persbericht van drie tot vier zinnen samenvatten wat u vandaag heeft besloten, en waarom de bevolking daarop zou moeten vertrouwen?"</p>
+      <textarea id="pers-bericht" placeholder="Schrijf hier je persbericht…"></textarea>
+
+      <button class="actie" id="btn-pers-verder">Geef antwoord en ga naar de uitslag</button>
+    </div>
+  </section>
+
+  <!-- SCHERM 4: EINDE -->
+  <section class="scherm" id="scherm-einde">
+    <div class="kaart">
+      <p class="sub">Na een aantal grote besluiten is je eerste periode als minister voorbij.</p>
+      <div class="eind-emoji" id="eind-emoji"></div>
+      <h2 class="titel-groot" id="eind-titel"></h2>
+      <p id="eind-uitleg"></p>
+
+      <div class="eind-meters" id="eind-meters"></div>
+
+      <h3 class="recap-kop">Het verloop van je periode</h3>
+      <div id="verloop-grafiek"></div>
+      <div class="grafiek-legenda">
+        <span><span class="stipje" style="background:var(--inkt);"></span>Tevredenheid</span>
+        <span><span class="stipje" style="background:var(--koffer);"></span>Coalitiesteun</span>
+      </div>
+
+      <p>Jouw eindscore:</p>
+      <div class="score-groot" id="eind-score">0</div>
+      <p class="hoogste-melding" id="hoogste-melding"></p>
+
+      <h3 class="recap-kop">Jouw regeerakkoord</h3>
+      <ul class="regeerakkoord-lijst" id="regeerakkoord-lijst"></ul>
+
+      <div class="klas-vak">
+        <b>Voor de klas:</b> vergelijk je titel en score met een klasgenoot. Wie hield de coalitie het langst overeind? Wie had de gezondste staatskas? En waar kozen jullie precies anders?
+      </div>
+
+      <button class="actie" id="btn-opnieuw">Speel opnieuw</button>
+      <button class="actie secundair" id="btn-kopieer">Kopieer resultaat</button>
+      <p class="hoogste-melding" id="kopieer-melding"></p>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  /* ================= DATA ================= */
+  const posten = [
+    { naam: "Zorg", start: 0 },
+    { naam: "Onderwijs", start: 0 },
+    { naam: "Sociale zekerheid (AOW, uitkeringen)", start: 0 },
+    { naam: "Defensie & Veiligheid", start: 0 },
+    { naam: "Klimaat & Infrastructuur", start: 0 },
+    { naam: "Bestuur & overig", start: 0 },
+  ];
+
+  const alleGebeurtenissen = [
+    {
+      titel: "De AOW-leeftijd",
+      tekst: "Coalitiepartijen willen de AOW-leeftijd sneller laten stijgen om geld vrij te maken voor de zorg. Ouderenbonden zijn faliekant tegen.",
+      keuzes: [
+        { tekst: "Verhoog de AOW-leeftijd sneller.", effect: { tevredenheid: -15, coalitie: 10, begroting: 15 },
+          gevolg: "Ouderenbonden zijn woedend en voeren actie. De coalitie is opgelucht: dit bespaart flink.",
+          kop: "\u201cKabinet verhoogt AOW-leeftijd versneld, actiegroepen woedend\u201d" },
+        { tekst: "Laat de AOW-leeftijd voorlopig gelijk.", effect: { tevredenheid: 10, coalitie: -10, begroting: -15 },
+          gevolg: "Ouderen zijn opgelucht. Je coalitiepartners mopperen: waar komt het geld dan wél vandaan?",
+          kop: "\u201cAOW blijft ongemoeid, coalitiepartners stellen kritische vragen\u201d" },
+        { tekst: "Kies een compromis: iets minder snel verhogen.", effect: { tevredenheid: -2, coalitie: -2, begroting: 3 },
+          gevolg: "Niemand is heel blij, maar niemand is woedend. Een compromis, zoals wel vaker in de politiek.",
+          kop: "\u201cHalfslachtig compromis over AOW-leeftijd, niemand echt tevreden\u201d" },
+      ],
+    },
+    {
+      titel: "Druk uit de NAVO",
+      tekst: "Bondgenoten dringen aan op meer geld voor Defensie. Je eigen begroting voor Defensie bepaalt hoeveel ruimte je al had.",
+      keuzes: [
+        { tekst: "Verhoog het defensiebudget fors.", effect: { tevredenheid: -8, coalitie: 15, begroting: -14 },
+          gevolg: "De NAVO is tevreden en je coalitie ook. Maar het geld moet ergens vandaan komen.",
+          kop: "\u201cNederland verhoogt defensie-uitgaven fors, NAVO tevreden\u201d" },
+        { tekst: "Verhoog het budget een beetje.", effect: { tevredenheid: 0, coalitie: 5, begroting: -4 },
+          gevolg: "Een tussenweg. Niemand juicht, maar niemand klaagt hard.",
+          kop: "\u201cBescheiden verhoging defensiebudget, bondgenoten hadden meer verwacht\u201d" },
+        { tekst: "Weiger extra geld voor Defensie.", effect: { tevredenheid: 5, coalitie: -18, begroting: 16 },
+          gevolg: "Je bespaart geld, maar twee coalitiepartijen zijn not amused. Ze dreigen ermee dit onderwerp op scherp te zetten.",
+          kop: "\u201cKabinet weigert extra defensiegeld, coalitiespanning loopt op\u201d" },
+      ],
+    },
+    {
+      titel: "Boze boeren bij het Malieveld",
+      tekst: "De stikstofdoelen voor 2030 komen in gevaar. Boerenorganisaties eisen versoepeling, natuurorganisaties eisen juist strenger beleid.",
+      keuzes: [
+        { tekst: "Houd vast aan strenge stikstofdoelen.", effect: { tevredenheid: -10, coalitie: -5, begroting: 2 },
+          gevolg: "Boeren blokkeren snelwegen met tractoren. Natuurorganisaties zijn tevreden, maar dat merk je niet in de peilingen.",
+          kop: "\u201cTractoren blokkeren snelwegen na vasthouden aan stikstofdoelen\u201d" },
+        { tekst: "Versoepel de regels voor boeren.", effect: { tevredenheid: 8, coalitie: 8, begroting: 0 },
+          gevolg: "Boeren zijn gerustgesteld. Brussel stuurt een kritische brief over de klimaatdoelen.",
+          kop: "\u201cStikstofregels versoepeld, Brussel reageert bezorgd\u201d" },
+        { tekst: "Bied boeren een uitkoopregeling aan.", effect: { tevredenheid: 2, coalitie: 2, begroting: -8 },
+          gevolg: "Een dure, maar relatief vreedzame oplossing. Niet elke boer doet mee.",
+          kop: "\u201cKabinet trekt miljarden uit voor uitkoop boeren\u201d" },
+      ],
+    },
+    {
+      titel: "Tegenvallend nieuws van het CPB",
+      tekst: "Het Centraal Planbureau voorspelt lagere belastinginkomsten dan verwacht. Er ontstaat een gat in de begroting.",
+      keuzes: [
+        { tekst: "Bezuinig meteen om het gat te dichten.", effect: { tevredenheid: -12, coalitie: -5, begroting: 20 },
+          gevolg: "Pijnlijke maatregelen, maar de boekhouding klopt weer. Verschillende sectoren protesteren.",
+          kop: "\u201cKabinet grijpt meteen in na tegenvaller CPB, sectoren in verzet\u201d" },
+        { tekst: "Leen extra geld om het gat te overbruggen.", effect: { tevredenheid: 5, coalitie: 0, begroting: -20 },
+          gevolg: "Niemand merkt er meteen iets van, maar de staatsschuld loopt op. Die rekening komt later.",
+          kop: "\u201cStaatsschuld loopt verder op na extra lening kabinet\u201d" },
+        { tekst: "Verhoog de belastingen iets.", effect: { tevredenheid: -8, coalitie: -3, begroting: 12 },
+          gevolg: "Burgers zien hun nettoloon dalen en zijn daar niet blij mee. De begroting knapt wel wat op.",
+          kop: "\u201cLichte belastingverhoging moet begrotingsgat dichten\u201d" },
+      ],
+    },
+    {
+      titel: "Een meevaller",
+      tekst: "De economie groeit harder dan verwacht. Er is onverwacht meer geld binnengekomen dan begroot. Wat doe je ermee?",
+      keuzes: [
+        { tekst: "Los een deel van de staatsschuld af.", effect: { tevredenheid: 0, coalitie: 5, begroting: 20 },
+          gevolg: "Saai, maar verstandig. Economen zijn te spreken over je degelijkheid.",
+          kop: "\u201cMeevaller gaat naar aflossen staatsschuld, economen tevreden\u201d" },
+        { tekst: "Steek het in zorg en onderwijs.", effect: { tevredenheid: 15, coalitie: 5, begroting: -5 },
+          gevolg: "Leraren en zorgpersoneel zijn blij verrast. Je populariteit stijgt merkbaar.",
+          kop: "\u201cExtra geld naar zorg en onderwijs, sector blij verrast\u201d" },
+        { tekst: "Geef het terug via een belastingverlaging.", effect: { tevredenheid: 10, coalitie: -3, begroting: -12 },
+          gevolg: "Iedereen houdt netto iets meer over. Sommige coalitiepartners hadden dit geld liever anders besteed.",
+          kop: "\u201cBelastingverlaging aangekondigd na economische meevaller\u201d" },
+      ],
+    },
+    {
+      titel: "Personeelstekort in de zorg",
+      tekst: "Ziekenhuizen luiden de noodklok: er is een groot tekort aan verpleegkundigen. Wachtlijsten lopen op.",
+      keuzes: [
+        { tekst: "Verhoog de salarissen in de zorg fors.", effect: { tevredenheid: 12, coalitie: -6, begroting: -12 },
+          gevolg: "Zorgpersoneel is opgelucht. Coalitiepartijen vragen zich af waar dit stopt: andere sectoren willen nu ook meer.",
+          kop: "\u201cForse loonsverhoging voor zorgpersoneel aangekondigd\u201d" },
+        { tekst: "Investeer in minder administratie, niet in salaris.", effect: { tevredenheid: 3, coalitie: 2, begroting: -2 },
+          gevolg: "Een goedkopere maatregel die op termijn kan helpen, maar zorgpersoneel had liever direct meer loon gezien.",
+          kop: "\u201cKabinet belooft minder regeldruk in de zorg\u201d" },
+        { tekst: "Wacht af en doe voorlopig niets.", effect: { tevredenheid: -14, coalitie: -4, begroting: 8 },
+          gevolg: "Je bespaart geld, maar het personeelstekort loopt verder op. De vakbonden dreigen met acties.",
+          kop: "\u201cVakbonden dreigen met acties na uitblijven maatregelen zorg\u201d" },
+      ],
+    },
+    {
+      titel: "Studenten op het Malieveld",
+      tekst: "Studenten protesteren tegen de voorwaarden van de basisbeurs. De oppositie ruikt een kans, je coalitie is verdeeld.",
+      keuzes: [
+        { tekst: "Verhoog de basisbeurs.", effect: { tevredenheid: 10, coalitie: -8, begroting: -6 },
+          gevolg: "Studenten zijn tevreden. Een coalitiepartij vindt dit te duur en te snel toegegeven.",
+          kop: "\u201cBasisbeurs omhoog na studentenprotesten\u201d" },
+        { tekst: "Beloof onderzoek, geen directe verhoging.", effect: { tevredenheid: -6, coalitie: 4, begroting: 2 },
+          gevolg: "Studenten voelen zich niet gehoord. Je coalitie is blij met het uitstel.",
+          kop: "\u201cKabinet belooft onderzoek, studenten voelen zich genegeerd\u201d" },
+        { tekst: "Verhoog de aanvullende beurs voor lage inkomens.", effect: { tevredenheid: 6, coalitie: 2, begroting: -4 },
+          gevolg: "Een gerichte maatregel die de grootste protestgroep gedeeltelijk tevredenstelt.",
+          kop: "\u201cAanvullende beurs omhoog, protest ebt gedeeltelijk weg\u201d" },
+      ],
+    },
+    {
+      titel: "Geen huizen te vinden",
+      tekst: "De woningnood loopt op. Makelaars en woningcorporaties vragen om ingrijpen, projectontwikkelaars waarschuwen voor te veel regels.",
+      keuzes: [
+        { tekst: "Trek extra geld uit voor sociale woningbouw.", effect: { tevredenheid: 10, coalitie: 0, begroting: -12 },
+          gevolg: "Op de lange termijn goed nieuws voor woningzoekenden. Op korte termijn verandert er weinig.",
+          kop: "\u201cMiljardeninvestering in sociale woningbouw aangekondigd\u201d" },
+        { tekst: "Verruim de regels voor projectontwikkelaars.", effect: { tevredenheid: -4, coalitie: 6, begroting: 6 },
+          gevolg: "Bouwbedrijven zijn tevreden. Buurtbewoners vrezen dat kwaliteit en groen het onderspit delven.",
+          kop: "\u201cRegels voor bouwprojecten versoepeld, buurten bezorgd\u201d" },
+        { tekst: "Wacht op een breder, later te presenteren plan.", effect: { tevredenheid: -10, coalitie: -2, begroting: 4 },
+          gevolg: "Niemand wordt geholpen, en dat valt op. De woningnood blijft het gesprek van de dag.",
+          kop: "\u201cKabinet stelt woonplan opnieuw uit, kritiek zwelt aan\u201d" },
+      ],
+    },
+    {
+      titel: "Energierekeningen schieten omhoog",
+      tekst: "Door onrust op de wereldmarkt stijgen de energieprijzen fors. Huishoudens maken zich zorgen over de winter.",
+      keuzes: [
+        { tekst: "Compenseer huishoudens met een energietoeslag.", effect: { tevredenheid: 14, coalitie: 2, begroting: -14 },
+          gevolg: "Huishoudens ademen op. De maatregel is duur en moet uit een andere pot komen.",
+          kop: "\u201cKabinet trekt miljarden uit voor energietoeslag\u201d" },
+        { tekst: "Verlaag tijdelijk de energiebelasting.", effect: { tevredenheid: 8, coalitie: 4, begroting: -6 },
+          gevolg: "Een goedkopere ingreep die iedereen een beetje helpt, rijk en arm.",
+          kop: "\u201cEnergiebelasting tijdelijk omlaag\u201d" },
+        { tekst: "Grijp niet in, de markt lost dit vanzelf op.", effect: { tevredenheid: -16, coalitie: -6, begroting: 10 },
+          gevolg: "De staatskas blijft gezond, maar huishoudens voelen zich in de kou gezet, letterlijk en figuurlijk.",
+          kop: "\u201cKabinet grijpt niet in bij stijgende energieprijzen, kritiek zwelt aan\u201d" },
+      ],
+    },
+    {
+      titel: "Big tech ontwijkt belasting",
+      tekst: "Uit onderzoek blijkt dat een aantal grote techbedrijven nauwelijks belasting betaalt in Nederland. Kamerleden eisen actie, het bedrijfsleven waarschuwt voor een minder aantrekkelijk vestigingsklimaat.",
+      keuzes: [
+        { tekst: "Voer een aparte digitale belasting in.", effect: { tevredenheid: 10, coalitie: -4, begroting: 10 },
+          gevolg: "Kiezers zijn te spreken over de aanpak. Werkgeversorganisaties waarschuwen dat bedrijven kunnen vertrekken.",
+          kop: "\u201cKabinet voert digitale belasting in voor techbedrijven\u201d" },
+        { tekst: "Wacht op een gezamenlijke EU-aanpak.", effect: { tevredenheid: -6, coalitie: 4, begroting: 0 },
+          gevolg: "Voorzichtig, maar traag. Sommige Kamerleden vinden dit een excuus om niets te doen.",
+          kop: "\u201cKabinet wacht op Europese aanpak belastingontwijking\u201d" },
+        { tekst: "Sluit gerichte belastingdeals steviger dicht.", effect: { tevredenheid: 4, coalitie: 2, begroting: 6 },
+          gevolg: "Een gematigde aanpak die weinig weerstand oproept, en ook weinig extra geld oplevert.",
+          kop: "\u201cKabinet sluit mazen in belastingdeals met multinationals\u201d" },
+      ],
+    },
+    {
+      titel: "Cyberaanval op de Belastingdienst",
+      tekst: "Een grote cyberaanval legt tijdelijk een deel van de Belastingdienst plat. Experts waarschuwen dat de digitale beveiliging van de overheid al jaren achterloopt.",
+      keuzes: [
+        { tekst: "Investeer meteen fors in digitale beveiliging.", effect: { tevredenheid: 4, coalitie: 6, begroting: -12 },
+          gevolg: "Een dure, maar geruststellende maatregel. IT-experts zijn te spreken over de aanpak.",
+          kop: "\u201cKabinet trekt miljoenen uit voor digitale veiligheid overheid\u201d" },
+        { tekst: "Vraag eerst een onderzoek naar de omvang van het probleem.", effect: { tevredenheid: -4, coalitie: 0, begroting: -2 },
+          gevolg: "Zorgvuldig, maar traag. Critici vinden dat er allang actie had moeten komen.",
+          kop: "\u201cKabinet stelt onderzoek in naar digitale veiligheid, kritiek op traagheid\u201d" },
+        { tekst: "Los alleen het acute probleem op, niet de rest.", effect: { tevredenheid: -8, coalitie: -2, begroting: 4 },
+          gevolg: "Goedkoop, maar riskant: het onderliggende probleem blijft bestaan.",
+          kop: "\u201cKabinet lapt lek, structureel probleem blijft liggen\u201d" },
+      ],
+    },
+    {
+      titel: "Onderwijsachterstanden lopen op",
+      tekst: "Scholen melden groeiende leerachterstanden. Leraren vragen om extra handen in de klas, ouders om meer duidelijkheid.",
+      keuzes: [
+        { tekst: "Investeer in extra leraren en bijlesprogramma's.", effect: { tevredenheid: 12, coalitie: 2, begroting: -10 },
+          gevolg: "Scholen zijn opgelucht, al duurt het even voordat er genoeg extra leraren te vinden zijn.",
+          kop: "\u201cKabinet trekt geld uit voor extra leraren en bijles\u201d" },
+        { tekst: "Geef scholen zelf een budget om te besteden naar eigen inzicht.", effect: { tevredenheid: 4, coalitie: 4, begroting: -4 },
+          gevolg: "Scholen waarderen de vrijheid, maar niet elke school maakt er evenveel werk van.",
+          kop: "\u201cScholen krijgen vrij te besteden budget tegen leerachterstanden\u201d" },
+        { tekst: "Wacht op de resultaten van lopend onderzoek.", effect: { tevredenheid: -10, coalitie: 0, begroting: 2 },
+          gevolg: "Leraren en ouders voelen zich niet gehoord. De achterstanden lopen intussen verder op.",
+          kop: "\u201cKabinet wacht af bij oplopende leerachterstanden, scholen ongeduldig\u201d" },
+      ],
+    },
+  ];
+
+  const triviaFeiten = [
+    "De koffertjestraditie bestaat sinds 1947. Minister Lieftinck kocht toen voor een paar gulden een eenvoudig bruin koffertje, naar Engels voorbeeld.",
+    "Prinsjesdag bestaat al sinds 1814. Pas in 1887 werd de derde dinsdag van september de vaste datum die we nu kennen.",
+    "1 miljard seconden is bijna 32 jaar. De bedragen in de Rijksbegroting lopen al snel in de miljarden euro's.",
+  ];
+
+  const dossierKaarten = [
+    {
+      emoji: "🏛️",
+      titel: "Prinsjesdag 2026",
+      tekst: "Elk jaar, op de derde dinsdag van september, gebeurt er iets in Den Haag. Dit jaar: dinsdag 15 september 2026. Het is de officiële opening van het parlementaire jaar.",
+    },
+    {
+      emoji: "👑",
+      titel: "De Troonrede",
+      tekst: "Koning Willem-Alexander leest een tekst voor die het kabinet heeft geschreven: de Troonrede. Daarin staan de belangrijkste plannen voor het komende jaar. Sinds februari 2026 regeert het kabinet-Jetten (D66, VVD, CDA), met Rob Jetten als minister-president.",
+    },
+    {
+      emoji: "💼",
+      titel: "Het koffertje",
+      tekst: "Jij, als minister van Financiën, overhandigt de Miljoenennota en de Rijksbegroting aan de Tweede Kamer. Daarin staat hoeveel geld de overheid verwacht binnen te krijgen, en hoeveel ze aan wat gaat uitgeven.",
+    },
+    {
+      emoji: "🎯",
+      titel: "Jouw missie",
+      tekst: "Jij gaat nu zelf die knopen doorhakken. Iedere keuze raakt de tevredenheid van de bevolking, de steun van je coalitie, en de staatskas. Er is geen perfecte oplossing: dat heet schaarste. Dit spel duurt ongeveer 30 minuten; neem de tijd om je keuzes toe te lichten.",
+      isLaatste: true,
+    },
+  ];
+
+  const alleKamervragen = [
+    {
+      vraag: "Kamerlid: \u201cMinister, wat overhandigt u vandaag precies aan de Tweede Kamer?\u201d",
+      opties: ["De Troonrede", "De Miljoenennota en de Rijksbegroting", "Het regeerakkoord"],
+      goedIndex: 1,
+      uitlegGoed: "Correct. De Troonrede leest de koning voor; u overhandigt de Miljoenennota en de Rijksbegroting.",
+      uitlegFout: "Niet helemaal. U overhandigt de Miljoenennota en de Rijksbegroting; de Troonrede is voor de koning.",
+    },
+    {
+      vraag: "Kamerlid: \u201cKunt u uitleggen wat 'schaarste' precies betekent, minister?\u201d",
+      opties: ["Er is te weinig geld gedrukt", "Onbegrensde wensen tegenover beperkte middelen", "Een tekort op de handelsbalans"],
+      goedIndex: 1,
+      uitlegGoed: "Correct. Schaarste betekent dat wensen onbegrensd zijn, maar middelen beperkt.",
+      uitlegFout: "Niet helemaal. Schaarste gaat over onbegrensde wensen tegenover beperkte middelen, niet over drukwerk of handelscijfers.",
+    },
+    {
+      vraag: "Kamerlid: \u201cUit welke partijen bestaat uw eigen coalitie, minister?\u201d",
+      opties: ["PVV, VVD en NSC", "D66, VVD en CDA", "GroenLinks-PvdA, D66 en CDA"],
+      goedIndex: 1,
+      uitlegGoed: "Correct. Het kabinet-Jetten bestaat uit D66, VVD en CDA.",
+      uitlegFout: "Niet helemaal. Uw eigen coalitie bestaat uit D66, VVD en CDA.",
+    },
+    {
+      vraag: "Kamerlid: \u201cWanneer is Prinsjesdag eigenlijk altijd, minister?\u201d",
+      opties: ["De eerste maandag van september", "De derde dinsdag van september", "De laatste vrijdag van september"],
+      goedIndex: 1,
+      uitlegGoed: "Correct. Prinsjesdag is altijd de derde dinsdag van september.",
+      uitlegFout: "Niet helemaal. Prinsjesdag is altijd de derde dinsdag van september.",
+    },
+    {
+      vraag: "Kamerlid: \u201cWie leest de Troonrede eigenlijk voor, minister?\u201d",
+      opties: ["De minister-president", "De koning", "De voorzitter van de Eerste Kamer"],
+      goedIndex: 1,
+      uitlegGoed: "Correct. De koning leest de Troonrede voor, al schrijft het kabinet de tekst.",
+      uitlegFout: "Niet helemaal. De koning leest de Troonrede voor, niet de minister-president.",
+    },
+    {
+      vraag: "Kamerlid: \u201cIn welk document staan de plannen en cijfers voor het komende jaar precies, minister?\u201d",
+      opties: ["De Grondwet", "De Miljoenennota", "Het regeerakkoord"],
+      goedIndex: 1,
+      uitlegGoed: "Correct. De Miljoenennota bevat de plannen en cijfers voor het komende jaar.",
+      uitlegFout: "Niet helemaal. Dat staat in de Miljoenennota, niet in de Grondwet of het regeerakkoord.",
+    },
+  ];
+
+  /* ================= STATE ================= */
+  let volgorde = [];
+  let programma = [];
+  let programmaPointer = 0;
+  let meters = { tevredenheid: 50, coalitie: 50, begroting: 0 };
+  let meterSnapshot = { tevredenheid: 50, coalitie: 50, begroting: 0 };
+  let huidigeKeuzeIndex = null;
+  let volgendeGeprobeerdZonderToelichting = false;
+  let dossierIndex = 0;
+  let regeerakkoordLog = [];
+  let metersGeschiedenis = [];
+
+  /* ================= HULPFUNCTIES ================= */
+  function schud(array) {
+    const a = array.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function toonScherm(id) {
+    document.querySelectorAll('.scherm').forEach(s => s.classList.remove('actief'));
+    document.getElementById(id).classList.add('actief');
+  }
+
+  function kleurVoorWaarde(w) {
+    if (w >= 60) return '#3F6E4A';
+    if (w >= 35) return '#B7803F';
+    return '#9C3B34';
+  }
+
+  function renderHud(hudId) {
+    const hud = document.getElementById(hudId || 'hud');
+    const begrotingPct = Math.max(0, Math.min(100, ((meters.begroting + 60) / 120) * 100));
+    hud.innerHTML = `
+      <div class="meter-blok">
+        <div class="naam">Tevredenheid</div>
+        <div class="balk-buiten"><div class="balk-binnen" style="width:${meters.tevredenheid}%; background:${kleurVoorWaarde(meters.tevredenheid)}"></div></div>
+        <div class="getal">${Math.round(meters.tevredenheid)} / 100</div>
+      </div>
+      <div class="meter-blok">
+        <div class="naam">Coalitiesteun</div>
+        <div class="balk-buiten"><div class="balk-binnen" style="width:${meters.coalitie}%; background:${kleurVoorWaarde(meters.coalitie)}"></div></div>
+        <div class="getal">${Math.round(meters.coalitie)} / 100</div>
+      </div>
+      <div class="meter-blok">
+        <div class="naam">Staatskas</div>
+        <div class="balk-buiten"><div class="balk-binnen" style="width:${begrotingPct}%; background:${kleurVoorWaarde(begrotingPct)}"></div></div>
+        <div class="getal">${meters.begroting > 0 ? '+' : ''}${Math.round(meters.begroting)}</div>
+      </div>
+    `;
+  }
+
+  /* ================= BEGROTING-STAP ================= */
+  const rijenEl = document.getElementById('budget-rijen');
+  posten.forEach((p, i) => {
+    const rij = document.createElement('div');
+    rij.className = 'budget-rij';
+    rij.innerHTML = `
+      <label for="budget-${i}">${p.naam}</label>
+      <input type="range" id="budget-${i}" min="0" max="100" value="${p.start}">
+      <span class="budget-waarde" id="waarde-${i}">${p.start}</span>
+    `;
+    rijenEl.appendChild(rij);
+  });
+
+  let zorgPunten = 25;
+  function updateBudgetTotaal() {
+    let totaal = 0;
+    posten.forEach((p, i) => {
+      const val = Number(document.getElementById(`budget-${i}`).value);
+      document.getElementById(`waarde-${i}`).textContent = val;
+      totaal += val;
+      if (i === 0) zorgPunten = val;
+    });
+    const totaalEl = document.getElementById('budget-totaal');
+    if (totaal === 100) {
+      totaalEl.textContent = `Totaal: 100 / 100. Klaar om te beginnen.`;
+    } else if (totaal < 100) {
+      totaalEl.textContent = `Totaal: ${totaal} / 100. Nog ${100 - totaal} te verdelen.`;
+    } else {
+      totaalEl.textContent = `Totaal: ${totaal} / 100. Je zit ${totaal - 100} punten te hoog.`;
+    }
+    totaalEl.className = 'budget-totaal ' + (totaal === 100 ? 'ok' : '');
+    document.getElementById('btn-naar-gebeurtenissen').disabled = (totaal !== 100);
+  }
+  posten.forEach((p, i) => document.getElementById(`budget-${i}`).addEventListener('input', updateBudgetTotaal));
+  updateBudgetTotaal();
+
+  /* ================= NAVIGATIE ================= */
+  /* ================= DOSSIER-BRIEFING ================= */
+  function renderDossier() {
+    const kaart = dossierKaarten[dossierIndex];
+    document.getElementById('dossier-inhoud').innerHTML = `
+      <div class="dossier-emoji">${kaart.emoji}</div>
+      <h2>${kaart.titel}</h2>
+      <p>${kaart.tekst}</p>
+    `;
+    const stappenEl = document.getElementById('dossier-stappen');
+    stappenEl.innerHTML = dossierKaarten.map((_, i) => {
+      const klasse = i < dossierIndex ? 'gedaan' : (i === dossierIndex ? 'huidig' : '');
+      return `<div class="stap ${klasse}"></div>`;
+    }).join('');
+    document.getElementById('btn-dossier-terug').style.visibility = dossierIndex === 0 ? 'hidden' : 'visible';
+    document.getElementById('btn-dossier-verder').textContent = kaart.isLaatste ? 'Begin als minister' : 'Volgende';
+  }
+  renderDossier();
+
+  document.getElementById('btn-dossier-verder').addEventListener('click', () => {
+    if (dossierKaarten[dossierIndex].isLaatste) {
+      toonScherm('scherm-begroting');
+      return;
+    }
+    dossierIndex++;
+    renderDossier();
+  });
+  document.getElementById('btn-dossier-terug').addEventListener('click', () => {
+    if (dossierIndex > 0) { dossierIndex--; renderDossier(); }
+  });
+
+  document.getElementById('btn-naar-gebeurtenissen').addEventListener('click', () => {
+    volgorde = schud(alleGebeurtenissen).slice(0, 9);
+    const kamervragen = schud(alleKamervragen).slice(0, 4);
+    const trivia = schud([0, 1, 2]).slice(0, 2);
+    regeerakkoordLog = [];
+    metersGeschiedenis = [{ tevredenheid: 50, coalitie: 50 }];
+    meters = { tevredenheid: 50, coalitie: 50, begroting: 0 };
+    // Startbegroting geeft een kleine vliegende start: weinig aan zorg besteed maakt je kwetsbaarder.
+    if (zorgPunten < 15) meters.tevredenheid -= 5;
+    if (zorgPunten > 30) meters.tevredenheid += 5;
+
+    // Bouw één keer een vaste "programma-wachtrij" op, zodat elke knop gewoon
+    // "ga naar het volgende programmapunt" kan zeggen zonder zelf te hoeven
+    // uitrekenen wat dat volgende punt is.
+    programma = [];
+    volgorde.forEach((g, i) => {
+      programma.push({ type: 'gebeurtenis', gebeurtenis: g, volgNummer: i });
+      if (i === 0) programma.push({ type: 'kamervraag', vraag: kamervragen[0] });
+      if (i === 1) programma.push({ type: 'trivia', feit: triviaFeiten[trivia[0]] });
+      if (i === 2) programma.push({ type: 'kamervraag', vraag: kamervragen[1] });
+      if (i === 3) programma.push({ type: 'tussenbalans', nummer: 0 });
+      if (i === 4) programma.push({ type: 'kamervraag', vraag: kamervragen[2] });
+      if (i === 5) programma.push({ type: 'trivia', feit: triviaFeiten[trivia[1]] });
+      if (i === 6) programma.push({ type: 'kamervraag', vraag: kamervragen[3] });
+      if (i === 7) programma.push({ type: 'tussenbalans', nummer: 1 });
+    });
+    programma.push({ type: 'pers' });
+    programmaPointer = 0;
+
+    toonHuidigeStap();
+  });
+
+  function toonHuidigeStap() {
+    const stap = programma[programmaPointer];
+    if (!stap) { toonEinde(); return; }
+    if (stap.type === 'gebeurtenis') { toonScherm('scherm-gebeurtenis'); toonGebeurtenis(stap); }
+    else if (stap.type === 'kamervraag') { toonKamervraag(stap); }
+    else if (stap.type === 'trivia') { toonTrivia(stap); }
+    else if (stap.type === 'tussenbalans') { toonTussenbalans(stap); }
+    else if (stap.type === 'pers') { toonPersconferentie(); }
+  }
+
+  function gaNaarVolgendeStap() {
+    programmaPointer++;
+    toonHuidigeStap();
+  }
+
+  const totaalGebeurtenissen = () => programma.filter(s => s.type === 'gebeurtenis').length;
+
+  function toonGebeurtenis(stap) {
+    const g = stap.gebeurtenis;
+    meterSnapshot = { ...meters };
+    huidigeKeuzeIndex = null;
+    renderHud();
+    document.getElementById('voortgang-tekst').textContent = `Besluit ${stap.volgNummer + 1} van ${volgorde.length}`;
+    const stappenEl = document.getElementById('stappen');
+    stappenEl.innerHTML = volgorde.map((_, i) => {
+      const klasse = i < stap.volgNummer ? 'gedaan' : (i === stap.volgNummer ? 'huidig' : '');
+      return `<div class="stap ${klasse}"></div>`;
+    }).join('');
+    document.getElementById('gebeurtenis-titel').textContent = g.titel;
+    document.getElementById('gebeurtenis-tekst').textContent = g.tekst;
+    document.getElementById('gevolg-vak').style.display = 'none';
+    document.getElementById('wissel-hint').style.display = 'none';
+    document.getElementById('toelichting-label').style.display = 'none';
+    document.getElementById('toelichting').style.display = 'none';
+    document.getElementById('toelichting').value = '';
+    document.getElementById('toelichting-nudge').style.display = 'none';
+    volgendeGeprobeerdZonderToelichting = false;
+    document.getElementById('btn-volgende').style.display = 'none';
+
+    const container = document.getElementById('keuzes-container');
+    container.innerHTML = '';
+    g.keuzes.forEach((k, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'keuze-knop';
+      btn.textContent = k.tekst;
+      btn.addEventListener('click', () => kiesOptie(g, i));
+      container.appendChild(btn);
+    });
+  }
+
+  function kiesOptie(gebeurtenis, index) {
+    if (huidigeKeuzeIndex !== null && huidigeKeuzeIndex !== index) {
+      document.getElementById('toelichting').value = '';
+    }
+    huidigeKeuzeIndex = index;
+    const keuze = gebeurtenis.keuzes[index];
+    meters.tevredenheid = Math.max(0, Math.min(100, meterSnapshot.tevredenheid + keuze.effect.tevredenheid));
+    meters.coalitie = Math.max(0, Math.min(100, meterSnapshot.coalitie + keuze.effect.coalitie));
+    meters.begroting = Math.max(-60, Math.min(60, meterSnapshot.begroting + keuze.effect.begroting));
+    renderHud();
+
+    document.querySelectorAll('.keuze-knop').forEach((b, i) => {
+      b.classList.toggle('gekozen', i === index);
+    });
+    document.getElementById('gevolg-vak').style.display = 'block';
+    document.getElementById('wissel-hint').style.display = 'block';
+    document.getElementById('toelichting-label').style.display = 'block';
+    document.getElementById('toelichting').style.display = 'block';
+    document.getElementById('krantenkop').textContent = keuze.kop || '';
+    document.getElementById('gevolg-tekst').textContent = keuze.gevolg;
+
+    const fmt = (label, val) => {
+      if (val === 0) return '';
+      const klasse = val > 0 ? 'plus' : 'min';
+      const teken = val > 0 ? '+' : '';
+      return `<span class="${klasse}">${label} ${teken}${val}</span>`;
+    };
+    document.getElementById('effect-lijst').innerHTML =
+      fmt('Tevredenheid', keuze.effect.tevredenheid) +
+      fmt('Coalitie', keuze.effect.coalitie) +
+      fmt('Staatskas', keuze.effect.begroting);
+
+    document.getElementById('btn-volgende').style.display = 'inline-block';
+  }
+
+  document.getElementById('btn-volgende').addEventListener('click', () => {
+    const stap = programma[programmaPointer];
+    if (huidigeKeuzeIndex !== null) {
+      const toelichting = document.getElementById('toelichting').value.trim();
+      if (!toelichting && !volgendeGeprobeerdZonderToelichting) {
+        volgendeGeprobeerdZonderToelichting = true;
+        document.getElementById('toelichting-nudge').style.display = 'block';
+        document.getElementById('toelichting').focus();
+        return;
+      }
+      const keuzeTekst = stap.gebeurtenis.keuzes[huidigeKeuzeIndex].tekst + (toelichting ? ` (Toelichting: ${toelichting})` : ' (geen toelichting gegeven)');
+      regeerakkoordLog.push({ titel: stap.gebeurtenis.titel, keuze: keuzeTekst });
+      metersGeschiedenis.push({ tevredenheid: meters.tevredenheid, coalitie: meters.coalitie });
+    }
+    gaNaarVolgendeStap();
+  });
+
+  function toonTrivia(stap) {
+    document.getElementById('trivia-tekst').textContent = stap.feit;
+    toonScherm('scherm-trivia');
+  }
+  document.getElementById('btn-trivia-verder').addEventListener('click', gaNaarVolgendeStap);
+
+  /* ================= KAMERVRAAG ================= */
+  let kamervraagSnapshotCoalitie = 50;
+
+  function toonKamervraag(stap) {
+    const vraag = stap.vraag;
+    kamervraagSnapshotCoalitie = meters.coalitie;
+
+    document.getElementById('kamervraag-tekst').textContent = vraag.vraag;
+    document.getElementById('kamervraag-gevolg-vak').style.display = 'none';
+    document.getElementById('btn-kamervraag-verder').style.display = 'none';
+
+    const container = document.getElementById('kamervraag-opties');
+    container.innerHTML = '';
+    vraag.opties.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'keuze-knop';
+      btn.textContent = opt;
+      btn.addEventListener('click', () => beantwoordKamervraag(vraag, i));
+      container.appendChild(btn);
+    });
+
+    toonScherm('scherm-kamervraag');
+  }
+
+  function beantwoordKamervraag(vraag, index) {
+    const goed = index === vraag.goedIndex;
+    meters.coalitie = Math.max(0, Math.min(100, kamervraagSnapshotCoalitie + (goed ? 6 : -6)));
+    renderHud();
+
+    document.querySelectorAll('#kamervraag-opties .keuze-knop').forEach((b, i) => {
+      b.classList.remove('goed', 'fout');
+      if (i === vraag.goedIndex) b.classList.add('goed');
+      else if (i === index) b.classList.add('fout');
+    });
+
+    document.getElementById('kamervraag-gevolg-vak').style.display = 'block';
+    document.getElementById('kamervraag-gevolg-tekst').textContent = goed ? vraag.uitlegGoed : vraag.uitlegFout;
+    document.getElementById('btn-kamervraag-verder').style.display = 'inline-block';
+  }
+
+  document.getElementById('btn-kamervraag-verder').addEventListener('click', gaNaarVolgendeStap);
+
+  /* ================= TUSSENBALANS ================= */
+  const tussenbalansen = [
+    {
+      titel: "Halverwege je eerste periode",
+      tekst: "Welke afweging tot nu toe vond je het lastigst om te maken, en waarom? Gebruik het woord 'schaarste' of 'afweging' in je antwoord.",
+    },
+    {
+      titel: "Bijna aan het einde",
+      tekst: "Stel dat je nu zou moeten kiezen tussen coalitiesteun en tevredenheid van de bevolking: wat weegt voor jou het zwaarst, en waarom?",
+    },
+  ];
+
+  function toonTussenbalans(stap) {
+    const tb = tussenbalansen[stap.nummer];
+    document.getElementById('tussenbalans-titel').textContent = tb.titel;
+    document.getElementById('tussenbalans-tekst').textContent = tb.tekst;
+    document.getElementById('tussenbalans-antwoord').value = '';
+    renderHud('hud-tussenbalans');
+    toonScherm('scherm-tussenbalans');
+  }
+
+  document.getElementById('btn-tussenbalans-verder').addEventListener('click', () => {
+    const antwoord = document.getElementById('tussenbalans-antwoord').value.trim();
+    if (antwoord) {
+      regeerakkoordLog.push({ titel: '(Tussenbalans)', keuze: antwoord });
+    }
+    gaNaarVolgendeStap();
+  });
+
+  /* ================= PERSCONFERENTIE ================= */
+  function toonPersconferentie() {
+    document.getElementById('pers-antwoord').value = '';
+    document.getElementById('pers-bericht').value = '';
+    toonScherm('scherm-pers');
+  }
+  document.getElementById('btn-pers-verder').addEventListener('click', () => {
+    window._persAntwoord = document.getElementById('pers-antwoord').value.trim();
+    window._persBericht = document.getElementById('pers-bericht').value.trim();
+    try {
+      if (window._persAntwoord) {
+        localStorage.setItem('prinsjesdag2026:laatste-reflectie', window._persAntwoord);
+      }
+      if (window._persBericht) {
+        localStorage.setItem('prinsjesdag2026:laatste-persbericht', window._persBericht);
+      }
+    } catch (err) { console.warn('Kon reflectie niet opslaan:', err); }
+    toonEinde();
+  });
+
+  /* ================= EINDSCHERM ================= */
+  function bepaalTitel() {
+    const { tevredenheid, coalitie, begroting } = meters;
+    if (coalitie <= 20) return { titel: "Kabinetscrisis!", emoji: "💥", uitleg: "Je coalitiepartners hebben het vertrouwen opgezegd. Er komen nieuwe verkiezingen, nog voor je periode is afgelopen." };
+    if (tevredenheid <= 20) return { titel: "De peilingen staan er slecht voor", emoji: "📉", uitleg: "De bevolking is weinig te spreken over jouw beleid. Tijd om het roer om te gooien." };
+    if (begroting <= -40) return { titel: "De Rekenkamer belt elke dag", emoji: "🧾", uitleg: "Het begrotingstekort loopt flink op. Je opvolger erft een lastige puzzel." };
+    if (tevredenheid >= 68 && coalitie >= 60) return { titel: "Minister van het jaar", emoji: "🏆", uitleg: "Een zeldzame combinatie: de bevolking is blij, en je coalitie ook. Chapeau." };
+    if (begroting >= 30) return { titel: "Zuinige Piet", emoji: "💰", uitleg: "De staatskas puilt uit. Verstandig, al vragen sommigen zich af of het niet iets scheutiger had gemogen." };
+    return { titel: "Een degelijke minister", emoji: "⚖️", uitleg: "Geen schandalen, geen gejuich. Je hebt de tent overeind gehouden, en dat is ook iets." };
+  }
+
+  function tekenVerloopGrafiek() {
+    const w = 600, h = 160, pad = 10;
+    const n = metersGeschiedenis.length;
+    const x = i => pad + (i / (n - 1)) * (w - pad * 2);
+    const y = v => h - pad - (v / 100) * (h - pad * 2);
+
+    const puntenTevr = metersGeschiedenis.map((m, i) => `${x(i)},${y(m.tevredenheid)}`).join(' ');
+    const puntenCoal = metersGeschiedenis.map((m, i) => `${x(i)},${y(m.coalitie)}`).join(' ');
+
+    const stipjes = (arr, veld, kleur) => arr.map((m, i) =>
+      `<circle cx="${x(i)}" cy="${y(m[veld])}" r="3.5" fill="${kleur}" />`
+    ).join('');
+
+    document.getElementById('verloop-grafiek').innerHTML = `
+      <svg viewBox="0 0 ${w} ${h}" style="width:100%; height:auto; display:block;">
+        <line x1="${pad}" y1="${y(50)}" x2="${w-pad}" y2="${y(50)}" stroke="#E8E1D0" stroke-width="1" stroke-dasharray="4 3" />
+        <polyline points="${puntenTevr}" fill="none" stroke="#16324F" stroke-width="2.5" />
+        <polyline points="${puntenCoal}" fill="none" stroke="#8C5A1E" stroke-width="2.5" />
+        ${stipjes(metersGeschiedenis, 'tevredenheid', '#16324F')}
+        ${stipjes(metersGeschiedenis, 'coalitie', '#8C5A1E')}
+      </svg>
+    `;
+  }
+
+  function toonEinde() {
+    const { titel, emoji, uitleg } = bepaalTitel();
+    document.getElementById('eind-emoji').textContent = emoji;
+    document.getElementById('eind-titel').textContent = titel;
+    document.getElementById('eind-uitleg').textContent = uitleg;
+
+    const begrotingPct = Math.max(0, Math.min(100, ((meters.begroting + 60) / 120) * 100));
+    const eindscore = Math.round((meters.tevredenheid + meters.coalitie + begrotingPct) / 3);
+
+    document.getElementById('eind-meters').innerHTML = `
+      <div class="meter-blok">
+        <div class="naam">Tevredenheid</div>
+        <div class="balk-buiten"><div class="balk-binnen" style="width:${meters.tevredenheid}%; background:${kleurVoorWaarde(meters.tevredenheid)}"></div></div>
+        <div class="getal">${Math.round(meters.tevredenheid)} / 100</div>
+      </div>
+      <div class="meter-blok">
+        <div class="naam">Coalitiesteun</div>
+        <div class="balk-buiten"><div class="balk-binnen" style="width:${meters.coalitie}%; background:${kleurVoorWaarde(meters.coalitie)}"></div></div>
+        <div class="getal">${Math.round(meters.coalitie)} / 100</div>
+      </div>
+      <div class="meter-blok">
+        <div class="naam">Staatskas</div>
+        <div class="balk-buiten"><div class="balk-binnen" style="width:${begrotingPct}%; background:${kleurVoorWaarde(begrotingPct)}"></div></div>
+        <div class="getal">${meters.begroting > 0 ? '+' : ''}${Math.round(meters.begroting)}</div>
+      </div>
+    `;
+    document.getElementById('eind-score').textContent = eindscore;
+    tekenVerloopGrafiek();
+
+    const lijstEl = document.getElementById('regeerakkoord-lijst');
+    lijstEl.innerHTML = regeerakkoordLog.map(item => `<li><b>${item.titel}</b>${item.keuze}</li>`).join('');
+
+    try {
+      const hoogsteRaw = localStorage.getItem('prinsjesdag2026:hoogste-score');
+      const hoogste = hoogsteRaw ? Number(hoogsteRaw) : 0;
+      const melding = document.getElementById('hoogste-melding');
+      if (eindscore > hoogste) {
+        localStorage.setItem('prinsjesdag2026:hoogste-score', String(eindscore));
+        melding.textContent = hoogste > 0 ? `Nieuw persoonlijk record! (was ${hoogste})` : 'Je eerste score is meteen je record.';
+      } else {
+        melding.textContent = `Jouw hoogste score op dit apparaat: ${hoogste}.`;
+      }
+    } catch (err) { console.warn('Kon score niet opslaan:', err); }
+
+    const akkoordTekst = regeerakkoordLog.map(item => `- ${item.titel}: ${item.keuze}`).join('\n');
+    const persTekst = window._persAntwoord ? `\n\nReflectie op de persconferentie: ${window._persAntwoord}` : '';
+    const berichtTekst = window._persBericht ? `\n\nMijn persbericht: ${window._persBericht}` : '';
+    window._laatsteResultaat = `Ik was minister van Financiën in "Het koffertje" en werd getiteld: ${titel} ${emoji}\nTevredenheid: ${Math.round(meters.tevredenheid)}/100, Coalitiesteun: ${Math.round(meters.coalitie)}/100, Staatskas: ${meters.begroting > 0 ? '+' : ''}${Math.round(meters.begroting)}\nEindscore: ${eindscore}. Kun jij het beter?\n\nMijn regeerakkoord:\n${akkoordTekst}${persTekst}${berichtTekst}`;
+    document.getElementById('kopieer-melding').textContent = '';
+
+    toonScherm('scherm-einde');
+  }
+
+  document.getElementById('btn-kopieer').addEventListener('click', async () => {
+    const melding = document.getElementById('kopieer-melding');
+    try {
+      await navigator.clipboard.writeText(window._laatsteResultaat || '');
+      melding.textContent = 'Gekopieerd! Plak het gerust ergens om te vergelijken met een klasgenoot.';
+    } catch (err) {
+      melding.textContent = window._laatsteResultaat || '';
+    }
+  });
+
+  document.getElementById('btn-opnieuw').addEventListener('click', () => {
+    dossierIndex = 0;
+    window._persAntwoord = '';
+    renderDossier();
+    posten.forEach((p, i) => { document.getElementById(`budget-${i}`).value = p.start; });
+    updateBudgetTotaal();
+    toonScherm('scherm-intro');
+  });
+</script>
+
+</body>
+</html>
