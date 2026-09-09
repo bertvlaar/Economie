@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Groeigeld: sparen, lenen en beleggen</title>
+<style>
+  :root {
+    --inkt: #16324F;
+    --inkt-licht: #2C4F72;
+    --spaar: #3F6E4A;
+    --spaar-licht: #5C8F68;
+    --lenen: #9C3B34;
+    --beleggen: #A98134;
+    --perkament: #F2EEE3;
+    --perkament-donker: #E8E1D0;
+    --tekst: #211C15;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--perkament);
+    color: var(--tekst);
+    font-family: -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.55;
+  }
+  h1, h2, h3 { font-family: Georgia, "Iowan Old Style", "Times New Roman", serif; }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 28px 20px 60px; }
+
+  header.top {
+    border-bottom: 2px solid var(--inkt);
+    padding: 22px 20px 16px;
+  }
+  header.top .wrap { padding: 0; }
+  header.top .sub { font-size: 0.85rem; color: #6b6455; margin: 0 0 4px; }
+  header.top h1 { font-size: clamp(1.4rem, 4.5vw, 1.9rem); color: var(--inkt); margin: 0; }
+
+  .scherm { display: none; animation: fadein 0.35s ease; }
+  .scherm.actief { display: block; }
+  @keyframes fadein { from { opacity: 0; transform: translateY(6px);} to { opacity: 1; transform: none; } }
+
+  .kaart {
+    background: #fff;
+    border: 1px solid var(--perkament-donker);
+    border-radius: 6px;
+    padding: 22px 24px;
+    margin-top: 18px;
+  }
+
+  p { margin: 0 0 12px; }
+  .label { color: var(--spaar); font-weight: 700; font-size: 0.85rem; margin-bottom: 4px; display: block; }
+
+  button.actie {
+    background: var(--inkt);
+    color: #fff;
+    border: none;
+    padding: 12px 22px;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-family: inherit;
+    cursor: pointer;
+    margin-top: 6px;
+  }
+  button.actie:hover { background: var(--inkt-licht); }
+  button.actie:disabled { background: #b9b2a0; cursor: not-allowed; }
+  button.secundair {
+    background: transparent;
+    color: var(--inkt);
+    border: 1px solid var(--inkt);
+  }
+  button.secundair:hover { background: var(--perkament-donker); }
+
+  textarea, input[type=number] {
+    font-family: inherit;
+    font-size: 1rem;
+    border: 1px solid #C9C1AC;
+    border-radius: 4px;
+    padding: 10px 12px;
+    background: #FBF9F3;
+  }
+  textarea { width: 100%; resize: vertical; min-height: 90px; margin: 10px 0; }
+  input[type=number] { width: 110px; }
+
+  .keuze-knop {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: var(--perkament);
+    border: 1px solid var(--perkament-donker);
+    border-radius: 4px;
+    padding: 12px 16px;
+    margin: 10px 0;
+    cursor: pointer;
+    font-size: 0.98rem;
+    font-family: inherit;
+    color: var(--tekst);
+  }
+  .keuze-knop:hover { border-color: var(--spaar); background: #fff; }
+  .keuze-knop.gekozen { border-color: var(--spaar); background: #fff; box-shadow: inset 0 0 0 1px var(--spaar); font-weight: 600; }
+  .keuze-knop.goed { border-color: var(--spaar); background: #E3EEE4; }
+  .keuze-knop.fout { border-color: var(--lenen); background: #F3E1DE; }
+  .wissel-hint { font-size: 0.82rem; color: #6b6455; font-style: italic; margin: -2px 0 4px; }
+
+  .gevolg-vak {
+    margin-top: 14px;
+    padding: 12px 16px;
+    background: var(--perkament);
+    border-left: 4px solid var(--spaar);
+    border-radius: 0 4px 4px 0;
+    font-size: 0.95rem;
+  }
+  .effect-lijst { font-size: 0.82rem; color: #6b6455; margin-top: 6px; }
+  .effect-lijst span { margin-right: 12px; }
+  .effect-lijst .plus { color: var(--spaar); font-weight: 700; }
+  .effect-lijst .min { color: var(--lenen); font-weight: 700; }
+
+  .hud { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 18px 0; }
+  .meter-blok { background: #fff; border: 1px solid var(--perkament-donker); border-radius: 6px; padding: 10px 12px; }
+  .meter-blok .naam { font-size: 0.72rem; color: #6b6455; margin-bottom: 4px; }
+  .meter-blok .balk-buiten { background: var(--perkament-donker); border-radius: 999px; height: 9px; overflow: hidden; }
+  .meter-blok .balk-binnen { height: 100%; border-radius: 999px; transition: width 0.5s ease, background 0.5s ease; }
+  .meter-blok .getal { font-size: 0.85rem; font-weight: 700; margin-top: 3px; color: var(--inkt); }
+
+  .voortgang { font-size: 0.82rem; color: var(--spaar); font-weight: 700; margin-bottom: 4px; }
+  .stappen { display: flex; gap: 6px; margin-bottom: 14px; }
+  .stappen .stap { flex: 1; height: 5px; border-radius: 999px; background: var(--perkament-donker); }
+  .stappen .stap.gedaan { background: var(--spaar); }
+  .stappen .stap.huidig { background: var(--spaar-licht); }
+
+  .trivia-kaart { background: var(--perkament); border: 1px dashed var(--beleggen); border-radius: 6px; padding: 18px 20px; margin-top: 18px; }
+  .trivia-kaart .label { color: var(--beleggen); }
+
+  .dossier-kaart { position: relative; }
+  .dossier-stempel {
+    display: inline-block;
+    border: 2px solid var(--spaar);
+    color: var(--spaar);
+    font-weight: 700;
+    font-size: 0.7rem;
+    letter-spacing: 0.03em;
+    padding: 4px 10px;
+    border-radius: 4px;
+    margin-bottom: 14px;
+  }
+  .dossier-emoji { font-size: 2.2rem; margin-bottom: 6px; }
+  .dossier-knoppen { display: flex; justify-content: space-between; margin-top: 18px; }
+  .docent-info {
+    margin-top: 16px;
+    font-size: 0.85rem;
+    color: #423c30;
+    background: #fff;
+    border: 1px dashed var(--perkament-donker);
+    border-radius: 6px;
+    padding: 12px 16px;
+  }
+  .docent-info summary { cursor: pointer; font-weight: 700; color: var(--inkt); }
+  .docent-info h4 { font-family: inherit; margin: 14px 0 4px; color: var(--inkt); font-size: 0.85rem; }
+  .docent-info ul { margin: 4px 0 8px; padding-left: 20px; }
+  .docent-info li { margin-bottom: 4px; }
+
+  .regeerakkoord-lijst { list-style: none; padding: 0; margin: 8px 0 16px; }
+  .regeerakkoord-lijst li { padding: 8px 0; border-bottom: 1px solid var(--perkament-donker); font-size: 0.9rem; }
+  .regeerakkoord-lijst li:last-child { border-bottom: none; }
+  .regeerakkoord-lijst b { color: var(--inkt); display: block; font-size: 0.82rem; }
+
+  .klas-vak {
+    background: var(--perkament);
+    border-left: 4px solid var(--inkt);
+    padding: 12px 16px;
+    border-radius: 0 4px 4px 0;
+    font-size: 0.9rem;
+    margin: 14px 0;
+  }
+  .titel-groot { font-size: 1.7rem; color: var(--inkt); margin: 4px 0 10px; }
+  .eind-emoji { font-size: 2.4rem; line-height: 1; }
+  .score-groot { font-size: 2.6rem; font-weight: 700; color: var(--spaar); font-family: Georgia, serif; }
+  .hoogste-melding { font-size: 0.85rem; color: var(--spaar); margin-top: 6px; }
+  .grafiek-legenda { font-size: 0.8rem; color: #6b6455; margin: 6px 0 16px; }
+
+  table.rekentabel { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 0.92rem; }
+  table.rekentabel th, table.rekentabel td { text-align: right; padding: 8px 6px; border-bottom: 1px solid var(--perkament-donker); }
+  table.rekentabel th:first-child, table.rekentabel td:first-child { text-align: left; }
+  table.rekentabel thead th { color: var(--inkt); font-weight: 700; border-bottom: 2px solid var(--inkt); }
+  .rekenvak { display: flex; flex-wrap: wrap; gap: 18px; margin: 14px 0; align-items: flex-end; }
+  .rekenveld label { display: block; font-size: 0.8rem; color: #6b6455; margin-bottom: 4px; }
+  .noot { font-size: 0.82rem; color: #6b6455; margin-top: 4px; }
+  .bron-lijst { font-size: 0.78rem; color: #6b6455; }
+  .bron-lijst li { margin-bottom: 4px; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <p class="sub">Economie · havo/vwo leerjaar 2/3 · werkblad bij Wereldspaardag (31 oktober)</p>
+    <h1>Groeigeld: sparen, lenen en beleggen</h1>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- SCHERM 0: DOSSIER-BRIEFING -->
+  <section class="scherm actief" id="scherm-intro">
+    <div class="kaart dossier-kaart">
+      <div class="dossier-stempel">WERELDSPAARDAG · 31 OKTOBER</div>
+      <div id="dossier-inhoud"></div>
+      <div class="stappen" id="dossier-stappen"></div>
+      <div class="dossier-knoppen">
+        <button class="actie secundair" id="btn-dossier-terug" style="visibility:hidden;">Vorige</button>
+        <button class="actie" id="btn-dossier-verder">Volgende</button>
+      </div>
+    </div>
+    <details class="docent-info">
+      <summary>Voor de docent</summary>
+      <h4>Leerdoelen</h4>
+      <ul>
+        <li>De leerling kan uitleggen wat rente-op-rente is en berekenen wat dat oplevert over verschillende periodes.</li>
+        <li>De leerling kan het verschil benoemen tussen sparen, lenen en beleggen in termen van risico en rendement.</li>
+        <li>De leerling kan uitleggen waarom een spaarrente lager dan de inflatie de koopkracht van spaargeld verlaagt.</li>
+        <li>De leerling herkent het belang van een financiële buffer bij onverwachte kosten.</li>
+        <li>De leerling kan uitleggen dat niet elke lening even duur is, en herkent risicospreiding als manier om beleggingsrisico te beperken.</li>
+      </ul>
+      <h4>Kernbegrippen</h4>
+      <p style="margin-bottom:0;">Sparen, rente, rente-op-rente, inflatie, koopkracht, lenen, schuld, beleggen, rendement, risico, risicospreiding, financiële buffer, de regel van 72.</p>
+      <h4>Tijdsindicatie (lesuur van 50 minuten)</h4>
+      <ul>
+        <li>Klassikale introductie: circa 5 minuten (leg kort uit wat de leerlingen gaan doen, en laat ze bij de rekenopdracht een spaardoel kiezen).</li>
+        <li>Zelfstandig werken op de laptop: circa 30 tot 35 minuten (dossier, rekenopdracht met groeigrafiek, simulatie, reflectie). Snelle leerlingen kunnen de begrippenlijst op het eindscherm gebruiken om hun antwoorden aan te scherpen.</li>
+        <li>Klassikale afsluiting met de stelling en het vergelijken van scores: circa 10 tot 15 minuten.</li>
+      </ul>
+      <h4>Differentiatie</h4>
+      <ul>
+        <li><b>Extra uitdaging:</b> laat leerlingen die klaar zijn de rekenopdracht opnieuw doorlopen met de rente van een studieschuld (2,33%) in plaats van de spaarrente, en laten ze beredeneren waarom die lager is dan de rente op een "koop nu, betaal later"-lening.</li>
+        <li><b>Extra ondersteuning:</b> laat leerlingen die moeite hebben met de rekenopdracht eerst alleen de kolom "spaarrekening" vergelijken met "onder het matras", zonder de inflatiecorrectie erbij te betrekken.</li>
+      </ul>
+      <h4>Nabespreektip</h4>
+      <p style="margin-bottom:0;">Laat een paar leerlingen hun eindtitel, eindscore en spaardoel voorlezen en vergelijk de "geldkeuzes" onderaan. Vraag door bij de simulatie: welke keuze leverde de grootste schade op, en waarom? Bespreek ook het verschil tussen de DUO-lening en de "koop nu, betaal later"-lening in de simulatie: waarom is de ene lening zoveel goedkoper dan de andere? Wijs er daarbij op dat het "vermogen" in de simulatie alleen liquide bezit meet (spaargeld en beleggingen min schuld), niet de waarde van spullen die je met een lening koopt: wie voor de laptop de goedkope DUO-lening neemt, ziet zijn vermogen dalen, terwijl hij er in het echt wél een laptop voor terugkrijgt. Gebruik daarna de stelling voor een klassikale discussie.</p>
+      <h4>Economie in de praktijk</h4>
+      <p style="margin-bottom:0;">De Nederlandsche Bank (DNB) houdt toezicht op banken en beschermt spaargeld tot €100.000 per rekeninghouder per bank. De Autoriteit Financiële Markten (AFM) controleert of financiële instellingen eerlijke, begrijpelijke informatie geven. De Europese Centrale Bank (ECB) bepaalt de belangrijkste rentetarieven voor de eurozone, wat doorwerkt in zowel de spaarrente als de rente op leningen.</p>
+      <h4>Actuele cijfers in dit werkblad (september 2026)</h4>
+      <ul class="bron-lijst">
+        <li>Spaarrente grote Nederlandse banken: circa 1,25% (ING, ABN AMRO) tot 1,50% (Rabobank), variabel en kan wijzigen (bron: geld.nl / Raisin, geraadpleegd 9 september 2026).</li>
+        <li>Inflatie Nederland (CPI): 3,3% in augustus 2026 (bron: CBS, gepubliceerd 8 september 2026).</li>
+        <li>Rente studieschuld (DUO): 2,33% voor de meeste huidige studenten (SF35-regeling) in 2026 (bron: DUO, gepubliceerd september 2026).</li>
+        <li>Energieprijzen (onderdeel van de inflatie): stegen in augustus 2026 met 11,7% op jaarbasis (bron: CBS).</li>
+        <li>Wereldspaardag: eerste editie op 31 oktober 1924, ingesteld tijdens het eerste internationale spaarbankcongres van de Wereldvereniging van Spaarbanken in Milaan (bron: onder meer RegioBank en Fonds1818).</li>
+      </ul>
+      <p style="margin-bottom:0;">Rentepercentages en inflatiecijfers veranderen. Controleer bij een volgend gebruik van dit werkblad of de genoemde percentages nog actueel zijn.</p>
+    </details>
+  </section>
+
+  <!-- SCHERM 1: REKENOPDRACHT RENTE-OP-RENTE -->
+  <section class="scherm" id="scherm-rekenopdracht">
+    <div class="kaart">
+      <p class="label">Rekenopdracht</p>
+      <h2>Wat levert rente-op-rente op?</h2>
+      <p>Stel: je zet een bedrag op je spaarrekening en laat het gewoon staan. Vergelijk dat met hetzelfde bedrag "onder het matras", waar het niet groeit. Vul hieronder zelf getallen in en bekijk wat er gebeurt.</p>
+      <div class="rekenvak">
+        <div class="rekenveld">
+          <label for="rk-bedrag">Startbedrag (€)</label>
+          <input type="number" id="rk-bedrag" value="100" min="1" step="1">
+        </div>
+        <div class="rekenveld">
+          <label for="rk-rente">Spaarrente per jaar (%)</label>
+          <input type="number" id="rk-rente" value="1.25" min="0" step="0.05">
+        </div>
+        <div class="rekenveld">
+          <label for="rk-inflatie">Inflatie per jaar (%)</label>
+          <input type="number" id="rk-inflatie" value="3.3" min="0" step="0.1">
+        </div>
+      </div>
+      <table class="rekentabel">
+        <thead>
+          <tr><th>Na</th><th>Onder het matras (nominaal)</th><th>Spaarrekening (rente-op-rente)</th><th>Matras, gecorrigeerd voor inflatie</th><th>Spaarrekening, gecorrigeerd voor inflatie</th></tr>
+        </thead>
+        <tbody id="rk-tabel-body"></tbody>
+      </table>
+      <p class="noot" id="rk-conclusie"></p>
+
+      <h3 style="margin-top:22px;">De groeicurve, in beeld</h3>
+      <p>Dezelfde cijfers, maar dan als lijn over 20 jaar. Er is een derde lijn toegevoegd: een breed beleggingsfonds met een langjarig gemiddeld rendement van 6% (met de kanttekening dat dat gemiddelde, in werkelijkheid, van jaar tot jaar flink op en neer gaat).</p>
+      <div id="rk-grafiek"></div>
+      <p class="grafiek-legenda" id="rk-grafiek-legenda"></p>
+
+      <div class="gevolg-vak" style="margin-top:10px;">
+        <p style="margin-bottom:2px;"><b>De regel van 72</b></p>
+        <p id="rk-regel72" style="margin-bottom:0;"></p>
+      </div>
+
+      <div class="gevolg-vak" style="margin-top:18px;">
+        <p style="margin-bottom:4px;"><b>Kennisvraag:</b> gebruik de tabel hierboven met de ingevulde waarden (rente 1,25%, inflatie 3,3%). Wat klopt er?</p>
+        <div id="rk-kennisvraag-opties"></div>
+        <p id="rk-kennisvraag-uitleg" style="display:none; margin-top:8px;"></p>
+      </div>
+
+      <h3 style="margin-top:22px;">Kies je spaardoel</h3>
+      <p>Voordat je aan de simulatie begint: waar zou jij voor sparen als het jouw eigen geld was? Je keuze verandert niets aan de simulatie zelf, maar aan het eind zie je of je vermogen genoeg was geweest om je doel te halen.</p>
+      <div id="spaardoel-opties"></div>
+
+      <button class="actie" id="btn-naar-simulatie" style="margin-top:18px;">Ga naar de simulatie</button>
+
+    </div>
+  </section>
+
+  <!-- SCHERM 2: GEBEURTENIS (simulatie-ronde) -->
+  <section class="scherm" id="scherm-gebeurtenis">
+    <div class="hud" id="hud"></div>
+    <div class="kaart">
+      <p class="voortgang" id="voortgang-tekst"></p>
+      <div class="stappen" id="stappen"></div>
+      <h2 id="gebeurtenis-titel"></h2>
+      <p id="gebeurtenis-tekst"></p>
+      <div id="keuzes-container"></div>
+      <p class="wissel-hint" id="wissel-hint" style="display:none;">Je kunt nog van keuze veranderen zolang je niet op "Volgende" klikt.</p>
+      <div class="gevolg-vak" id="gevolg-vak" style="display:none;">
+        <p id="gevolg-tekst" style="margin-bottom:6px;"></p>
+        <div class="effect-lijst" id="effect-lijst"></div>
+      </div>
+      <button class="actie" id="btn-volgende" style="display:none;">Volgende</button>
+    </div>
+  </section>
+
+  <!-- SCHERM 2b: TUSSENBALANS -->
+  <section class="scherm" id="scherm-tussenbalans">
+    <div class="hud" id="hud-tussenbalans"></div>
+    <div class="kaart">
+      <p class="label">Even pauzeren</p>
+      <h2 id="tussenbalans-titel"></h2>
+      <p id="tussenbalans-tekst"></p>
+      <textarea id="tussenbalans-antwoord" placeholder="Typ hier je antwoord…"></textarea>
+      <button class="actie" id="btn-tussenbalans-verder">Verder</button>
+    </div>
+  </section>
+
+  <!-- SCHERM 2c: TRIVIA -->
+  <section class="scherm" id="scherm-trivia">
+    <div class="trivia-kaart">
+      <p class="label">Wist je dat?</p>
+      <p id="trivia-tekst"></p>
+      <button class="actie" id="btn-trivia-verder">Verder</button>
+    </div>
+  </section>
+
+  <!-- SCHERM 2d: KENNISVRAAG -->
+  <section class="scherm" id="scherm-kennisvraag">
+    <div class="kaart">
+      <p class="label">Kennisvraag</p>
+      <p id="kennisvraag-tekst"></p>
+      <div id="kennisvraag-opties"></div>
+      <div class="gevolg-vak" id="kennisvraag-gevolg-vak" style="display:none;">
+        <p id="kennisvraag-gevolg-tekst"></p>
+      </div>
+      <button class="actie" id="btn-kennisvraag-verder" style="display:none;">Verder</button>
+    </div>
+  </section>
+
+  <!-- SCHERM 2e: REFLECTIE -->
+  <section class="scherm" id="scherm-reflectie">
+    <div class="kaart">
+      <p class="label">Reflectie</p>
+      <h2>Terugkijken op je geldkeuzes</h2>
+      <p>Wat was voor jou de lastigste keuze in de simulatie, en waarom?</p>
+      <textarea id="reflectie-antwoord1" placeholder="Typ hier je antwoord…"></textarea>
+      <p style="margin-top:18px;">Als je dit in het echt zou doen: wat zou je, na dit werkblad, anders doen met wat je nu weet over rente-op-rente, lenen en beleggen?</p>
+      <textarea id="reflectie-antwoord2" placeholder="Typ hier je antwoord…"></textarea>
+      <button class="actie" id="btn-reflectie-verder">Ga naar de uitslag</button>
+    </div>
+  </section>
+
+  <!-- SCHERM 3: EINDE -->
+  <section class="scherm" id="scherm-einde">
+    <div class="kaart">
+      <p class="sub">Jouw geldreis zit erop.</p>
+      <div class="eind-emoji" id="eind-emoji"></div>
+      <h2 class="titel-groot" id="eind-titel"></h2>
+      <p id="eind-uitleg"></p>
+
+      <div class="hud" id="eind-meters"></div>
+      <p id="eind-spaardoel" class="noot" style="margin-top:8px;"></p>
+
+      <h3>Waar bestaat je vermogen uit?</h3>
+      <div id="samenstelling-balk"></div>
+      <p class="grafiek-legenda" id="samenstelling-legenda"></p>
+      <p class="noot">Let op: dit vermogen telt alleen spaargeld, beleggingen en schuld. Kocht je met een lening iets van waarde, zoals een laptop of een console? Dan zie je dat hier niet terug als bezit, terwijl de schuld wel meetelt. Wie leent, ziet zijn vermogen dus altijd dalen, ook als het achteraf een verstandige lening was.</p>
+
+      <h3>Het verloop van je vermogen</h3>
+      <div id="verloop-grafiek"></div>
+      <p class="grafiek-legenda">Elk punt is een jaar in de simulatie. Vermogen = spaargeld + beleggingen − schulden.</p>
+
+      <p>Jouw eindscore:</p>
+      <div class="score-groot" id="eind-score">0</div>
+      <p class="hoogste-melding" id="hoogste-melding"></p>
+
+      <h3>Jouw geldkeuzes</h3>
+      <ul class="regeerakkoord-lijst" id="geldkeuzes-lijst"></ul>
+
+      <div class="klas-vak">
+        <p style="margin-bottom:6px;"><b>Stelling voor de klas:</b> "Beleggen is voor jongeren een slimmere manier om vermogen op te bouwen dan sparen, want de spaarrente ligt nu onder de inflatie."</p>
+        <p style="margin-bottom:0;">Bedenk zelf eerst een argument vóór en een argument tegen. Vergelijk daarna je eindscore en je "geldkeuzes" met een klasgenoot: wie hield de grootste buffer over, en wie het hoogste vermogen? Kwam dat door geluk (de beurskoersen) of door de keuzes zelf?</p>
+      </div>
+
+      <details class="docent-info">
+        <summary>Begrippenlijst (ter herhaling)</summary>
+        <ul style="margin-bottom:0;">
+          <li><b>Rente</b>: een vergoeding voor het uitlenen (sparen) of gebruiken (lenen) van geld.</li>
+          <li><b>Rente-op-rente</b>: rente die je ook ontvangt (of betaalt) over eerder bijgeschreven rente, waardoor een bedrag steeds sneller groeit.</li>
+          <li><b>Inflatie</b>: de gemiddelde stijging van prijzen, waardoor je met hetzelfde geld na verloop van tijd minder kunt kopen.</li>
+          <li><b>Koopkracht</b>: wat je daadwerkelijk kunt kopen met je geld, rekening houdend met inflatie.</li>
+          <li><b>Lenen / schuld</b>: geld dat je nu ontvangt, maar later met rente moet terugbetalen.</li>
+          <li><b>Beleggen</b>: geld investeren (bijvoorbeeld in aandelen), met kans op een hoger rendement maar ook op verlies.</li>
+          <li><b>Risico spreiden (diversificatie)</b>: je geld verdelen over meerdere dingen, zodat één tegenvaller minder hard aankomt.</li>
+          <li><b>Financiële buffer</b>: spaargeld dat je apart houdt om onverwachte kosten op te vangen zonder te hoeven lenen.</li>
+          <li><b>De regel van 72</b>: een vuistregel om snel te schatten hoe lang het duurt voordat een bedrag verdubbelt (72 gedeeld door het rentepercentage).</li>
+        </ul>
+      </details>
+
+      <button class="actie" id="btn-opnieuw" style="margin-top:16px;">Speel opnieuw</button>
+      <button class="actie secundair" id="btn-kopieer">Kopieer resultaat</button>
+      <p class="hoogste-melding" id="kopieer-melding"></p>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  /* ================= DOSSIER ================= */
+  const dossierKaarten = [
+    {
+      emoji: "🏦",
+      titel: "Wereldspaardag",
+      tekst: "Elk jaar op 31 oktober is het Wereldspaardag. De eerste editie was in 1924: op het eerste internationale spaarbankcongres in Milaan spraken afgevaardigden uit tientallen landen af om wereldwijd één dag per jaar aandacht te besteden aan het belang van sparen. In Nederland deden banken al snel mee.",
+    },
+    {
+      emoji: "💶",
+      titel: "Sparen en rente",
+      tekst: "Als je geld op een spaarrekening zet, krijg je daar rente over: een vergoeding van de bank voor het gebruik van jouw geld. Bij de grote Nederlandse banken is die spaarrente nu ongeveer 1,25 tot 1,50% per jaar (september 2026). Dat is veel lager dan een paar jaar geleden.",
+    },
+    {
+      emoji: "🔁",
+      titel: "Rente-op-rente",
+      tekst: "Rente-op-rente betekent dat je niet alleen rente krijgt over je oorspronkelijke inleg, maar ook over de rente die je eerder al ontving. Daardoor groeit je spaargeld niet in een rechte lijn, maar steeds iets sneller. Hoe langer je spaart, hoe groter dat effect wordt.",
+    },
+    {
+      emoji: "📈",
+      titel: "Inflatie: de stille tegenstander",
+      tekst: "Inflatie betekent dat de prijzen van spullen stijgen, waardoor je met hetzelfde geld minder kunt kopen. De inflatie in Nederland was in augustus 2026 zo'n 3,3%. Omdat dat hoger is dan de spaarrente, verliest spaargeld dit moment koopkracht, ook al staat er nominaal (in euro's) wel meer op de rekening.",
+    },
+    {
+      emoji: "🧾",
+      titel: "Lenen",
+      tekst: "Bij lenen krijg je nu geld, maar betaal je daar later rente over terug: meestal een veel hogere rente dan je op een spaarrekening zou krijgen. Onbetaalde schuld groeit daardoor snel. Lenen kan soms verstandig zijn, maar is bijna nooit gratis.",
+    },
+    {
+      emoji: "📊",
+      titel: "Beleggen",
+      tekst: "Bij beleggen koop je bijvoorbeeld aandelen of een beleggingsfonds. Op de lange termijn levert dat vaak meer op dan sparen, maar de waarde kan ook dalen: dat heet risico. Wie belegt, moet tegen een dalende koers kunnen, zonder in paniek te verkopen.",
+    },
+    {
+      emoji: "🥚",
+      titel: "Niet alle eieren in één mandje",
+      tekst: "Risico spreiden (diversificatie) betekent dat je je geld verdeelt over verschillende dingen, in plaats van alles op één kaart te zetten. Een breed beleggingsfonds belegt bijvoorbeeld al in honderden bedrijven tegelijk: gaat één bedrijf failliet, dan raak je maar een klein beetje van je geld kwijt. Spreiden verkleint het risico, maar haalt het nooit helemaal weg.",
+    },
+    {
+      emoji: "⏳",
+      titel: "De regel van 72",
+      tekst: "Wil je snel weten hoe lang het duurt voordat je geld verdubbelt? Deel 72 door het rentepercentage. Bij 1,25% rente duurt een verdubbeling dus ongeveer 72 ÷ 1,25 ≈ 58 jaar. Bij 6% rendement (ongeveer het langjarig gemiddelde bij beleggen) gaat dat in ongeveer 72 ÷ 6 = 12 jaar. Een klein verschil in rente maakt op de lange termijn dus een enorm verschil.",
+    },
+    {
+      emoji: "🏛️",
+      titel: "Wie houdt er toezicht?",
+      tekst: "De Nederlandsche Bank (DNB) houdt toezicht op banken en zorgt dat spaargeld tot €100.000 per persoon per bank beschermd is, mocht een bank omvallen. De Autoriteit Financiële Markten (AFM) controleert of banken en beleggingsaanbieders eerlijke informatie geven. De Europese Centrale Bank (ECB) bepaalt de belangrijkste rentetarieven voor de hele eurozone, wat weer doorwerkt in de spaarrente die jij krijgt.",
+    },
+    {
+      emoji: "🎯",
+      titel: "Wat ga je doen?",
+      tekst: "Eerst reken je zelf uit wat rente-op-rente concreet oplevert, met een grafiek erbij. Daarna maak je, jaar na jaar, geldkeuzes in een korte simulatie: sparen, beleggen, lenen en tegenvallers wisselen elkaar af, op weg naar een spaardoel dat je zelf kiest. Aan het eind zie je wat jouw keuzes hebben opgeleverd. Dit onderdeel duurt in totaal ongeveer 30 tot 35 minuten.",
+      isLaatste: true,
+    },
+  ];
+
+  let dossierIndex = 0;
+  function renderDossier() {
+    const k = dossierKaarten[dossierIndex];
+    document.getElementById('dossier-inhoud').innerHTML = `
+      <div class="dossier-emoji">${k.emoji}</div>
+      <h2>${k.titel}</h2>
+      <p>${k.tekst}</p>
+    `;
+    document.getElementById('dossier-stappen').innerHTML = dossierKaarten.map((_, i) => {
+      const klasse = i < dossierIndex ? 'gedaan' : (i === dossierIndex ? 'huidig' : '');
+      return `<div class="stap ${klasse}"></div>`;
+    }).join('');
+    document.getElementById('btn-dossier-terug').style.visibility = dossierIndex === 0 ? 'hidden' : 'visible';
+    document.getElementById('btn-dossier-verder').textContent = k.isLaatste ? 'Begin de rekenopdracht' : 'Volgende';
+  }
+  renderDossier();
+
+  document.getElementById('btn-dossier-verder').addEventListener('click', () => {
+    if (dossierIndex < dossierKaarten.length - 1) { dossierIndex++; renderDossier(); }
+    else { toonScherm('scherm-rekenopdracht'); }
+  });
+  document.getElementById('btn-dossier-terug').addEventListener('click', () => {
+    if (dossierIndex > 0) { dossierIndex--; renderDossier(); }
+  });
+
+  function toonScherm(id) {
+    document.querySelectorAll('.scherm').forEach(s => s.classList.remove('actief'));
+    document.getElementById(id).classList.add('actief');
+  }
+
+  /* ================= REKENOPDRACHT ================= */
+  function euro(n) {
+    return '€ ' + n.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function berekenRekentabel() {
+    const bedrag = Number(document.getElementById('rk-bedrag').value) || 0;
+    const rente = Number(document.getElementById('rk-rente').value) || 0;
+    const inflatie = Number(document.getElementById('rk-inflatie').value) || 0;
+    const jaren = [5, 10, 20];
+    const body = document.getElementById('rk-tabel-body');
+    body.innerHTML = jaren.map(j => {
+      const matrasNominaal = bedrag;
+      const spaarNominaal = bedrag * Math.pow(1 + rente / 100, j);
+      const matrasReeel = matrasNominaal / Math.pow(1 + inflatie / 100, j);
+      const spaarReeel = spaarNominaal / Math.pow(1 + inflatie / 100, j);
+      return `<tr>
+        <td>${j} jaar</td>
+        <td>${euro(matrasNominaal)}</td>
+        <td>${euro(spaarNominaal)}</td>
+        <td>${euro(matrasReeel)}</td>
+        <td>${euro(spaarReeel)}</td>
+      </tr>`;
+    }).join('');
+
+    const conclusieEl = document.getElementById('rk-conclusie');
+    if (rente < inflatie) {
+      conclusieEl.textContent = `Bij deze percentages ligt de rente (${rente}%) onder de inflatie (${inflatie}%). Je spaargeld groeit nominaal wel, maar de koopkracht ervan daalt toch: kijk naar de laatste kolom.`;
+    } else if (rente > inflatie) {
+      conclusieEl.textContent = `Bij deze percentages ligt de rente (${rente}%) boven de inflatie (${inflatie}%). Je koopkracht groeit dan ook echt mee: kijk naar de laatste kolom.`;
+    } else {
+      conclusieEl.textContent = `Bij deze percentages zijn rente en inflatie precies gelijk. De koopkracht van je spaargeld blijft dan ongeveer gelijk.`;
+    }
+
+    tekenRekenGrafiek(bedrag, rente);
+    berekenRegel72(rente);
+  }
+
+  const RENTE_BELEGGEN_ILLUSTRATIEF = 6; // %, langjarig gemiddelde ter illustratie in de rekenopdracht
+
+  function tekenRekenGrafiek(bedrag, rente) {
+    const w = 600, h = 200, padL = 46, padR = 14, padT = 14, padB = 26;
+    const jarenAs = Array.from({ length: 21 }, (_, i) => i); // 0 t/m 20
+    const reekMatras = jarenAs.map(() => bedrag);
+    const reekSparen = jarenAs.map(j => bedrag * Math.pow(1 + rente / 100, j));
+    const reekBeleggen = jarenAs.map(j => bedrag * Math.pow(1 + RENTE_BELEGGEN_ILLUSTRATIEF / 100, j));
+    const max = Math.max(...reekBeleggen, ...reekSparen, ...reekMatras, 1);
+    const x = i => padL + (i / 20) * (w - padL - padR);
+    const y = v => h - padB - (v / max) * (h - padT - padB);
+    const lijn = reeks => reeks.map((v, i) => `${x(i)},${y(v)}`).join(' ');
+    const asLabels = [0, 5, 10, 15, 20].map(j => `<text x="${x(j)}" y="${h - 6}" font-size="10" fill="#6b6455" text-anchor="middle">${j}j</text>`).join('');
+    const yLabels = [0, max / 2, max].map(v => `<text x="${padL - 6}" y="${y(v) + 3}" font-size="10" fill="#6b6455" text-anchor="end">${euro(v).replace(',00', '')}</text>`).join('');
+    document.getElementById('rk-grafiek').innerHTML = `
+      <svg viewBox="0 0 ${w} ${h}" style="width:100%; height:auto; display:block;">
+        <line x1="${padL}" y1="${h - padB}" x2="${w - padR}" y2="${h - padB}" stroke="#C9C1AC" stroke-width="1" />
+        <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${h - padB}" stroke="#C9C1AC" stroke-width="1" />
+        ${asLabels}${yLabels}
+        <polyline points="${lijn(reekMatras)}" fill="none" stroke="#9C3B34" stroke-width="2" stroke-dasharray="4 3" />
+        <polyline points="${lijn(reekSparen)}" fill="none" stroke="#16324F" stroke-width="2.5" />
+        <polyline points="${lijn(reekBeleggen)}" fill="none" stroke="#A98134" stroke-width="2" stroke-dasharray="1 0" />
+      </svg>
+    `;
+    document.getElementById('rk-grafiek-legenda').innerHTML =
+      `<span style="display:inline-block;width:10px;height:10px;background:#9C3B34;margin-right:4px;"></span>onder het matras &nbsp; ` +
+      `<span style="display:inline-block;width:10px;height:10px;background:#16324F;margin-right:4px;"></span>spaarrekening (${rente}%) &nbsp; ` +
+      `<span style="display:inline-block;width:10px;height:10px;background:#A98134;margin-right:4px;"></span>beleggen, illustratief (${RENTE_BELEGGEN_ILLUSTRATIEF}%)`;
+  }
+
+  function berekenRegel72(rente) {
+    const el = document.getElementById('rk-regel72');
+    if (rente <= 0) {
+      el.textContent = 'Bij 0% rente verdubbelt je geld nooit vanzelf: de regel van 72 werkt alleen bij een rente boven 0%.';
+      return;
+    }
+    const jarenVerdubbeling = (72 / rente).toFixed(1);
+    el.textContent = `Bij ${rente}% rente duurt het volgens de vuistregel "72 gedeeld door het rentepercentage" ongeveer ${jarenVerdubbeling} jaar voordat je bedrag verdubbelt.`;
+  }
+  ['rk-bedrag', 'rk-rente', 'rk-inflatie'].forEach(id => {
+    document.getElementById(id).addEventListener('input', berekenRekentabel);
+  });
+  berekenRekentabel();
+
+  const rkOpties = [
+    "Onder het matras is je bedrag na 20 jaar nog steeds evenveel euro's waard als vandaag",
+    "Op de spaarrekening staat na 20 jaar meer geld dan onder het matras, maar de koopkracht van dat gegroeide bedrag is toch lager dan wat je nu kunt kopen",
+    "Onder het matras groeit je koopkracht net zo hard als op de spaarrekening",
+  ];
+  const rkGoedIndex = 1;
+  const rkUitleg = [
+    "Niet helemaal: in euro's blijft het bedrag onder het matras inderdaad gelijk, maar door inflatie kun je er over 20 jaar minder mee kopen. De koopkracht daalt dus wel.",
+    "Klopt. De spaarrekening levert nominaal meer euro's op, maar omdat de rente (1,25%) lager is dan de inflatie (3,3%), daalt de koopkracht van dat bedrag toch. Sparen tegen een lage rente beschermt je niet volledig tegen inflatie.",
+    "Niet helemaal: onder het matras groeit het bedrag helemaal niet, terwijl de spaarrekening wel rente oplevert. De koopkracht daalt bij beide, maar minder hard op de spaarrekening.",
+  ];
+  const rkOptiesEl = document.getElementById('rk-kennisvraag-opties');
+  rkOpties.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'keuze-knop';
+    btn.textContent = opt;
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#rk-kennisvraag-opties .keuze-knop').forEach((b, j) => {
+        b.classList.remove('goed', 'fout');
+        if (j === rkGoedIndex) b.classList.add('goed');
+        else if (j === i) b.classList.add('fout');
+      });
+      const uitlegEl = document.getElementById('rk-kennisvraag-uitleg');
+      uitlegEl.style.display = 'block';
+      uitlegEl.textContent = rkUitleg[i];
+    });
+    rkOptiesEl.appendChild(btn);
+  });
+
+  document.getElementById('btn-naar-simulatie').addEventListener('click', () => {
+    startSimulatie();
+  });
+
+  /* ================= SPAARDOEL ================= */
+  const spaardoelOpties = [
+    { tekst: "Een nieuwe telefoon", bedrag: 400 },
+    { tekst: "Een verre reis met vrienden", bedrag: 800 },
+    { tekst: "Een scooter", bedrag: 1200 },
+    { tekst: "Geen specifiek doel, gewoon zoveel mogelijk overhouden", bedrag: 0 },
+  ];
+  let spaardoel = null;
+  const spaardoelEl = document.getElementById('spaardoel-opties');
+  spaardoelOpties.forEach((doel, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'keuze-knop';
+    btn.textContent = doel.bedrag > 0 ? `${doel.tekst} (ongeveer ${euro(doel.bedrag)})` : doel.tekst;
+    btn.addEventListener('click', () => {
+      spaardoel = doel;
+      document.querySelectorAll('#spaardoel-opties .keuze-knop').forEach((b, j) => b.classList.toggle('gekozen', j === i));
+    });
+    spaardoelEl.appendChild(btn);
+  });
+
+  /* ================= SIMULATIE-DATA ================= */
+  function schud(array) {
+    const a = array.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  // Jaarlijks rendement op beleggingen: realistisch, met kans op een verliesjaar.
+  const rendementenPool = [-18, -10, -3, 2, 5, 8, 8, 10, 12, 15, 18, 22];
+  function trekRendement() { return rendementenPool[Math.floor(Math.random() * rendementenPool.length)]; }
+
+  const RENTE_SPAREN = 1.25;      // % per ronde, actuele spaarrente grootbank
+  const RENTE_LENEN = 9;          // % per ronde, vergelijkbaar met doorlopend krediet / koop-nu-betaal-later
+  const RENTE_STUDIELENING = 2.33; // % per ronde, DUO-rente voor de meeste studenten in 2026
+
+  function betaalUit(bedrag, bron) {
+    const beschikbaar = state[bron];
+    const afgeschreven = Math.min(bedrag, beschikbaar);
+    state[bron] -= afgeschreven;
+    const tekort = bedrag - afgeschreven;
+    if (tekort > 0) state.schuld += tekort;
+    return { afgeschreven, tekort };
+  }
+
+  // Vaste openingsgebeurtenis: staat inhoudelijk aan het begin van de geldreis
+  // (Wereldspaardag), en wordt daarom nooit door elkaar geschud.
+  const openingsGebeurtenis = {
+    titel: "Wereldspaardag-cadeau",
+    tekst: "Het is Wereldspaardag. Je oma stopt je €100 toe met de woorden: \u201czet dat maar ergens goed neer\u201d. Wat doe je ermee?",
+    keuzes: [
+      { tekst: "Zet het op je spaarrekening.", voerUit: s => { s.spaargeld += 100; s.buffer += 10;
+          return "Veilig weggezet. Dit jaar groeit het met 1,25% rente, want dat is ongeveer de rente bij een grote Nederlandse bank."; } },
+      { tekst: "Beleg het in een breed beleggingsfonds.", voerUit: s => { s.beleggingen += 100;
+          return "Je geld staat nu op de beurs. Dat kan flink groeien, maar de waarde kan dit jaar ook dalen."; } },
+      { tekst: "Geef het uit aan iets leuks.", voerUit: s => { s.buffer -= 5;
+          return "Lekker, meteen plezier. Maar dit geld draagt dit jaar niet bij aan je vermogen of je buffer."; } },
+    ],
+  };
+
+  // Overige gebeurtenissen: pool van 11, waarvan er per speelronde willekeurig 7
+  // worden gebruikt (dus telkens 4 andere gebeurtenissen overgeslagen, voor variatie).
+  const overigeGebeurtenissen = [
+    {
+      titel: "Kapot scherm",
+      tekst: "Je laat je telefoon vallen. Het scherm is kapot: reparatie kost €60.",
+      keuzes: [
+        { tekst: "Betaal met geld van je spaarrekening.", voerUit: s => {
+            const { tekort } = betaalUit(60, 'spaargeld'); s.buffer -= 5;
+            return tekort > 0
+              ? `Je spaargeld was niet genoeg: het tekort van ${euro(tekort)} is bijgeschreven als schuld, en daarover betaal je nu rente.`
+              : "Vervelend, maar je houdt er geen schuld aan over. Dit is precies waarvoor een buffer dient.";
+          } },
+        { tekst: "Leen het bedrag (koop nu, betaal later).", voerUit: s => { s.schuld += 60; s.buffer -= 10;
+            return "Handig op het moment zelf, maar geleend reparatiegeld kost je rente: die schuld groeit vanzelf verder totdat je hem aflost."; } },
+        { tekst: "Verkoop een deel van je beleggingen.", voerUit: s => {
+            const { tekort } = betaalUit(60, 'beleggingen'); s.buffer -= 5;
+            return tekort > 0
+              ? `Je had niet genoeg beleggingen: het tekort van ${euro(tekort)} is bijgeschreven als schuld.`
+              : "Je haalt geld weg uit je beleggingen. Als de koers net laag staat, verkoop je op een ongunstig moment.";
+          } },
+      ],
+    },
+    {
+      titel: "Bijbaantje",
+      tekst: "Je hebt een bijbaantje (oppassen, kranten bezorgen) en houdt deze maand €150 over. Wat doe je ermee?",
+      keuzes: [
+        { tekst: "Alles op de spaarrekening.", voerUit: s => { s.spaargeld += 150; s.buffer += 10;
+            return "Veilig en voorspelbaar, met een bescheiden rendement."; } },
+        { tekst: "Alles beleggen.", voerUit: s => { s.beleggingen += 150;
+            return "Meer kans op een hoger rendement, maar ook meer risico op verlies dit jaar."; } },
+        { tekst: "De helft sparen, de helft beleggen.", voerUit: s => { s.spaargeld += 75; s.beleggingen += 75; s.buffer += 5;
+            return "Spreiden: een deel veilig, een deel met kans op meer rendement. Dat beperkt je risico."; } },
+      ],
+    },
+    {
+      titel: "Een nieuwe game-console",
+      tekst: "Een nieuwe game-console kost €300. Je hebt het geld niet, maar \u201ckoop nu, betaal later\u201d is in drie tellen geregeld.",
+      keuzes: [
+        { tekst: "Leen het bedrag en koop de console nu.", voerUit: s => { s.schuld += 300; s.buffer -= 10;
+            return "Je hebt hem meteen, maar over die €300 betaal je rente totdat de lening is afgelost. In deze simulatie kun je alleen aflossen als je later een meevaller gebruikt om de schuld te verkleinen."; } },
+        { tekst: "Spaar er eerst voor en koop hem later.", voerUit: s => { s.buffer += 5;
+            return "Minder spannend, maar je bouwt geen schuld op. Je koopt hem straks gewoon van je eigen geld."; } },
+      ],
+    },
+    {
+      titel: "Verjaardagscadeau",
+      tekst: "Je krijgt €200 voor je verjaardag. Wat doe je ermee?",
+      keuzes: [
+        { tekst: "Volledig sparen.", voerUit: s => { s.spaargeld += 200; s.buffer += 10;
+            return "Veilig weggezet tegen 1,25% rente."; } },
+        { tekst: "Volledig beleggen.", voerUit: s => { s.beleggingen += 200;
+            return "Kans op meer rendement, met bijbehorend risico."; } },
+        { tekst: "Gebruik het om schulden af te lossen (duurste eerst), of anders te sparen.", voerUit: s => {
+            let over = 200; const berichten = [];
+            if (s.schuld > 0) {
+              const afgelost = Math.min(over, s.schuld); s.schuld -= afgelost; over -= afgelost;
+              berichten.push(`je duurdere schuld (9% rente) met ${euro(afgelost)}`);
+            }
+            if (over > 0 && s.studieschuld > 0) {
+              const afgelost = Math.min(over, s.studieschuld); s.studieschuld -= afgelost; over -= afgelost;
+              berichten.push(`je studieschuld (2,33% rente) met ${euro(afgelost)}`);
+            }
+            if (berichten.length === 0) {
+              s.spaargeld += 200; s.buffer += 10;
+              return "Je had toevallig geen schuld openstaan, dus dit bedrag gaat gewoon naar je spaarrekening tegen 1,25% rente.";
+            }
+            s.buffer += 8;
+            const restTekst = over > 0 ? ` De rest (${euro(over)}) gaat naar je spaarrekening.` : '';
+            if (over > 0) s.spaargeld += over;
+            return `Slim: je lost eerst ${berichten.join(' en ')} af, want een lening met een hogere rente kost je verhoudingsgewijs het meest.${restTekst}`;
+          } },
+      ],
+    },
+    {
+      titel: "Onrust op de beurs",
+      tekst: "Het nieuws waarschuwt voor onrust op de beurs. Als je beleggingen hebt, gaat je gedachten daar meteen naartoe. Wat doe je?",
+      keuzes: [
+        { tekst: "Verkoop je beleggingen nu uit voorzorg.", voerUit: s => { s.spaargeld += s.beleggingen; s.beleggingen = 0; s.buffer += 5;
+            return "Je zet een eventueel verlies (of eventuele winst) vast op dit moment. Als de koersen later herstellen, profiteer je daar niet meer van."; } },
+        { tekst: "Blijf rustig zitten.", voerUit: s => { s.buffer += 5;
+            return "Verstandig: op de lange termijn herstellen beleggingen meestal van een dip. Wie voortijdig verkoopt, mist vaak het herstel."; } },
+        { tekst: "Koop juist bij, als je daar spaargeld voor hebt.", voerUit: s => {
+            if (s.spaargeld >= 50) { s.spaargeld -= 50; s.beleggingen += 50; s.buffer -= 5;
+              return "Bijkopen tegen een lagere prijs kan op termijn lonen, maar is risicovol als je dat geld snel nodig hebt.";
+            } else { s.buffer += 5;
+              return "Je hebt hier op dit moment niet genoeg spaargeld voor, dus je blijft feitelijk gewoon rustig zitten.";
+            }
+          } },
+      ],
+    },
+    {
+      titel: "Gestolen fiets",
+      tekst: "Je fiets wordt gestolen. Een tweedehands vervanger kost €120.",
+      keuzes: [
+        { tekst: "Betaal met geld van je spaarrekening.", voerUit: s => {
+            const { tekort } = betaalUit(120, 'spaargeld'); s.buffer -= 5;
+            return tekort > 0
+              ? `Je spaargeld was niet genoeg: het tekort van ${euro(tekort)} is bijgeschreven als schuld.`
+              : "Vervelend, maar geen extra schuld. Je buffer vangt de tegenvaller op.";
+          } },
+        { tekst: "Leen het bedrag.", voerUit: s => { s.schuld += 120; s.buffer -= 10;
+            return "Je hebt snel een fiets, maar bouwt weer een schuld op die rente kost."; } },
+        { tekst: "Verkoop een deel van je beleggingen.", voerUit: s => {
+            const { tekort } = betaalUit(120, 'beleggingen'); s.buffer -= 5;
+            return tekort > 0
+              ? `Je had niet genoeg beleggingen: het tekort van ${euro(tekort)} is bijgeschreven als schuld.`
+              : "Werkt, maar je haalt geld weg dat anders langer had kunnen groeien.";
+          } },
+      ],
+    },
+    {
+      titel: "Rijbewijs",
+      tekst: "Je wilt je rijbewijs halen: dat kost in totaal ongeveer €250.",
+      keuzes: [
+        { tekst: "Leen het volledige bedrag.", voerUit: s => { s.schuld += 250; s.buffer -= 10;
+            return "Je kunt meteen beginnen met lessen, maar betaalt rente over het hele bedrag totdat je aflost."; } },
+        { tekst: "Spaar er eerst voor en begin later.", voerUit: s => { s.buffer += 5;
+            return "Kost geduld, maar levert geen schuld op."; } },
+        { tekst: "Betaal wat je kunt uit je spaargeld, leen alleen het tekort.", voerUit: s => {
+            const gebruikt = Math.min(250, s.spaargeld);
+            s.spaargeld -= gebruikt;
+            const rest = 250 - gebruikt;
+            if (rest > 0) { s.schuld += rest; s.buffer += 3;
+              return `Je betaalt ${euro(gebruikt)} uit eigen spaargeld en leent alleen het tekort van ${euro(rest)}. Dat scheelt rente ten opzichte van alles lenen.`;
+            } else { s.buffer += 5;
+              return `Je kon het hele bedrag van je spaargeld betalen: geen schuld nodig.`;
+            }
+          } },
+      ],
+    },
+    {
+      titel: "Een vriend vraagt om geld",
+      tekst: "Een vriend vraagt of je €50 kunt lenen tot het einde van de maand.",
+      keuzes: [
+        { tekst: "Leen het uit, zonder duidelijke afspraken.", voerUit: s => { betaalUit(50, 'spaargeld'); s.buffer -= 5;
+            return "Je vriend betaalt het (nog) niet terug. Geld uitlenen zonder afspraken loopt in de praktijk regelmatig spaak."; } },
+        { tekst: "Leen het uit, maar spreek een terugbetaaldatum af.", voerUit: s => { s.buffer -= 2;
+            return "Je maakt duidelijke afspraken. Je vriend betaalt op tijd terug: dat scheelt gedoe, al kost het je wel een gesprek."; } },
+        { tekst: "Zeg dat je het liever niet doet.", voerUit: s => { s.buffer += 3;
+            return "Misschien voelt het ongemakkelijk, maar je voorkomt een lastige situatie. Geld lenen aan vrienden kan een vriendschap onder druk zetten."; } },
+      ],
+    },
+    {
+      titel: "Een laptop voor school",
+      tekst: "Je hebt een laptop nodig voor school, die kost €500. Je ouders wijzen je op twee manieren om te lenen, met heel verschillende rentes.",
+      keuzes: [
+        { tekst: "Leen tegen een lage rente, vergelijkbaar met een studielening (2,33%).", voerUit: s => { s.studieschuld += 500; s.buffer -= 5;
+            return "Een relatief goedkope lening: 2,33% is ongeveer de rente die in 2026 geldt voor de meeste studieschulden bij DUO. Niet gratis, maar wel veel goedkoper dan een gewone lening."; } },
+        { tekst: "Leen tegen een gewone consumptieve rente (9%).", voerUit: s => { s.schuld += 500; s.buffer -= 10;
+            return "Deze lening kost je flink meer rente dan de eerste optie. Niet elke lening is even duur: het loont om te vergelijken voordat je tekent."; } },
+        { tekst: "Spaar er eerst voor, ook al duurt dat langer.", voerUit: s => { s.buffer += 5;
+            return "Geen schuld, maar je moet wachten totdat je genoeg hebt gespaard. Soms is geduld de goedkoopste optie."; } },
+      ],
+    },
+    {
+      titel: "Een vast bijbaantje",
+      tekst: "Je hebt een vast bijbaantje en houdt structureel €220 over. Een vriend raadt aan dat bedrag meteen automatisch te laten overschrijven zodra het binnenkomt, zodat je niet in de verleiding komt om het uit te geven.",
+      keuzes: [
+        { tekst: "Zet een automatische overschrijving naar je spaarrekening in.", voerUit: s => { s.spaargeld += 220; s.buffer += 10;
+            return "Door dit automatisch te laten gebeuren, hoef je er niet elke keer opnieuw over na te denken. Dat is een bekende, effectieve manier om vol te houden met sparen."; } },
+        { tekst: "Zet het automatisch opzij voor beleggingen.", voerUit: s => { s.beleggingen += 220;
+            return "Ook hier geldt: automatisch en regelmatig beleggen zorgt dat je consequent inlegt, ongeacht of de koers die maand toevallig hoog of laag staat."; } },
+        { tekst: "Laat het op je betaalrekening staan, je regelt het straks wel.", voerUit: s => { s.buffer -= 5;
+            return "In de praktijk verdwijnt geld dat op de betaalrekening blijft staan vaak toch aan kleine dingen. \u201cStraks\u201d wordt nogal eens \u201cnooit\u201d."; } },
+      ],
+    },
+    {
+      titel: "Hoge energierekening",
+      tekst: "De energieprijzen zijn dit jaar flink gestegen. Je jaarafrekening (of die van je ouders, waar je aan meebetaalt) valt €90 hoger uit dan verwacht.",
+      keuzes: [
+        { tekst: "Betaal met geld van je spaarrekening.", voerUit: s => {
+            const { tekort } = betaalUit(90, 'spaargeld'); s.buffer -= 5;
+            return tekort > 0
+              ? `Je spaargeld was niet genoeg: het tekort van ${euro(tekort)} is bijgeschreven als schuld.`
+              : "Vervelend, maar geen extra schuld. Precies waarvoor een buffer dient.";
+          } },
+        { tekst: "Leen het bedrag.", voerUit: s => { s.schuld += 90; s.buffer -= 10;
+            return "Weer een kleine lening erbij, die rente kost totdat je hem aflost."; } },
+        { tekst: "Verkoop een deel van je beleggingen.", voerUit: s => {
+            const { tekort } = betaalUit(90, 'beleggingen'); s.buffer -= 5;
+            return tekort > 0
+              ? `Je had niet genoeg beleggingen: het tekort van ${euro(tekort)} is bijgeschreven als schuld.`
+              : "Werkt, maar je haalt geld weg dat anders langer had kunnen groeien.";
+          } },
+      ],
+    },
+  ];
+
+  const kennisvragenPool = [
+    {
+      vraag: "Je zet €100 op een spaarrekening tegen 2% rente per jaar. Na het eerste jaar krijg je €2 rente. Wat gebeurt er in het tweede jaar bij rente-op-rente?",
+      opties: ["Je krijgt weer precies €2 rente", "Je krijgt rente over €102, dus iets meer dan €2", "Je krijgt geen rente meer, want dat gebeurt maar één keer"],
+      goedIndex: 1,
+      uitlegGoed: "Correct. Bij rente-op-rente reken je de rente steeds over het nieuwe, hogere bedrag. Daardoor groeit je spaargeld elk jaar iets sneller.",
+      uitlegFout: "Niet helemaal. Bij rente-op-rente reken je de rente over het nieuwe, hogere bedrag (inleg plus eerder ontvangen rente), dus je krijgt elk jaar iets meer dan het jaar ervoor.",
+    },
+    {
+      vraag: "De spaarrente bij een grote Nederlandse bank is nu ongeveer 1,25%. De inflatie is ongeveer 3,3%. Wat betekent dat voor de koopkracht van je spaargeld?",
+      opties: ["Je koopkracht groeit, want je krijgt rente", "Je koopkracht daalt, want de prijzen stijgen sneller dan je rente", "Het maakt niets uit voor je koopkracht"],
+      goedIndex: 1,
+      uitlegGoed: "Correct. Omdat de inflatie hoger is dan de spaarrente, kun je later minder kopen met hetzelfde (gegroeide) spaargeld.",
+      uitlegFout: "Niet helemaal. Omdat de inflatie (3,3%) hoger is dan de spaarrente (1,25%), daalt de koopkracht van je spaargeld, ook al staat er nominaal meer op je rekening.",
+    },
+    {
+      vraag: "Waarom kost lenen je meestal meer dan sparen je oplevert?",
+      opties: ["Omdat banken de rente op leningen meestal hoger zetten dan de rente op spaargeld", "Omdat lenen illegaal is voor jongeren", "Omdat sparen verplicht is bij een lening"],
+      goedIndex: 0,
+      uitlegGoed: "Correct. De rente die je betaalt op een lening ligt vrijwel altijd veel hoger dan de rente die je krijgt op een spaarrekening.",
+      uitlegFout: "Niet helemaal. Banken vragen op leningen meestal een veel hogere rente dan ze op spaargeld uitkeren, en daar verdienen ze aan.",
+    },
+    {
+      vraag: "Wat is het belangrijkste verschil tussen sparen en beleggen?",
+      opties: ["Sparen is altijd duurder dan beleggen", "Bij beleggen loop je risico op verlies, maar kun je op de lange termijn meer rendement behalen dan bij sparen", "Beleggen is verboden onder de 18 jaar"],
+      goedIndex: 1,
+      uitlegGoed: "Correct. Het gaat om de afweging tussen risico en rendement: beleggen kan meer opleveren, maar de waarde kan ook dalen.",
+      uitlegFout: "Niet helemaal. Het belangrijkste verschil is de afweging tussen risico en rendement: beleggen kan meer opleveren dan sparen, maar met kans op verlies.",
+    },
+    {
+      vraag: "Je houdt een financiële buffer aan (wat spaargeld achter de hand). Waarom is dat handig?",
+      opties: ["Zodat je bij een tegenvaller niet meteen hoeft te lenen", "Omdat je dan geen belasting hoeft te betalen", "Omdat een buffer verplicht is voor je achttiende verjaardag"],
+      goedIndex: 0,
+      uitlegGoed: "Correct. Met een buffer kun je een tegenvaller, zoals een kapotte telefoon, betalen zonder ervoor te hoeven lenen.",
+      uitlegFout: "Niet helemaal. Een buffer is vooral handig omdat je daarmee tegenvallers kunt opvangen zonder schulden te maken.",
+    },
+    {
+      vraag: "Een studieschuld bij DUO kost in 2026 ongeveer 2,33% rente. Een gewone consumptieve lening (\u201ckoop nu, betaal later\u201d) kost al snel 8 tot 9% rente. Wat volgt daaruit?",
+      opties: ["Beide leningen kosten in de praktijk evenveel", "Niet elke lening is even duur: het loont om rentepercentages te vergelijken voordat je leent", "Een studieschuld is eigenlijk een vorm van sparen"],
+      goedIndex: 1,
+      uitlegGoed: "Correct. Het soort lening bepaalt sterk hoeveel rente je betaalt. Een studielening is doorgaans veel goedkoper dan een gewone consumptieve lening.",
+      uitlegFout: "Niet helemaal. Het verschil tussen 2,33% en 8 tot 9% is groot: het loont echt om te vergelijken welke lening je het minst kost.",
+    },
+    {
+      vraag: "Met de regel van 72 (72 gedeeld door het rentepercentage) bereken je ongeveer hoe snel je geld verdubbelt. Bij welk rentepercentage verdubbelt je geld het snelst?",
+      opties: ["1,25%", "6%", "0%"],
+      goedIndex: 1,
+      uitlegGoed: "Correct. Hoe hoger het rendement, hoe korter de verdubbelingstijd: bij 6% duurt het ongeveer 12 jaar, bij 1,25% ruim 55 jaar.",
+      uitlegFout: "Niet helemaal. Hoe hoger het rentepercentage, hoe sneller een bedrag verdubbelt: van deze drie is 6% het hoogst.",
+    },
+  ];
+
+  const triviaFeiten = [
+    "De eerste Wereldspaardag was op 31 oktober 1924. Op een internationaal spaarbankcongres in Milaan werd toen afgesproken om wereldwijd één dag per jaar aandacht te besteden aan het belang van sparen.",
+    "In Nederland mocht je in 2026 tot ongeveer €59.357 belastingvrij sparen en beleggen (het heffingvrije vermogen in box 3).",
+    "Rente-op-rente werkt krachtiger naarmate je langer spaart. Bij 1,25% rente duurt het ruim 55 jaar voordat een bedrag verdubbelt; bij 6% rendement (ongeveer het langjarig gemiddelde bij beleggen) gaat dat in ongeveer 12 jaar.",
+    "In augustus 2026 stegen de energieprijzen in Nederland met 11,7% ten opzichte van een jaar eerder. Dat is een van de belangrijkste redenen waarom de inflatie dat jaar relatief hoog was.",
+  ];
+
+  const tussenbalansen = [
+    { titel: "Halverwege je geldreis", tekst: "Welke keuze tot nu toe vond je het lastigst: sparen, beleggen of lenen? Licht in één zin toe waarom." },
+  ];
+
+  /* ================= STATE EN PROGRAMMA ================= */
+  let volgorde = [];
+  let programma = [];
+  let programmaPointer = 0;
+  let state = { spaargeld: 0, beleggingen: 0, schuld: 0, studieschuld: 0, buffer: 50 };
+  let stateSnapshot = { ...state };
+  let huidigeKeuzeIndex = null;
+  let geldkeuzesLog = [];
+  let vermogenGeschiedenis = [];
+
+  function vermogen(s) { return s.spaargeld + s.beleggingen - s.schuld - s.studieschuld; }
+
+  function kleurVoorWaarde(w) {
+    if (w >= 60) return '#3F6E4A';
+    if (w >= 35) return '#A98134';
+    return '#9C3B34';
+  }
+
+  function renderHud(hudId) {
+    const hud = document.getElementById(hudId || 'hud');
+    const v = vermogen(state);
+    const bufferPct = Math.max(0, Math.min(100, state.buffer));
+    const schuldDetail = (state.schuld > 0.5 || state.studieschuld > 0.5)
+      ? `<div class="noot" style="margin:2px 0 0;">waarvan schuld: ${euro(state.schuld + state.studieschuld)}${state.studieschuld > 0.5 ? ` (${euro(state.studieschuld)} daarvan tegen de lage studieschuld-rente)` : ''}</div>`
+      : '';
+    hud.innerHTML = `
+      <div class="meter-blok">
+        <div class="naam">Vermogen (spaargeld + beleggingen − schulden)</div>
+        <div class="getal" style="color:${v >= 0 ? '#3F6E4A' : '#9C3B34'};">${v >= 0 ? '+' : ''}${euro(v)}</div>
+        ${schuldDetail}
+      </div>
+      <div class="meter-blok">
+        <div class="naam">Financiële buffer</div>
+        <div class="balk-buiten"><div class="balk-binnen" style="width:${bufferPct}%; background:${kleurVoorWaarde(bufferPct)}"></div></div>
+        <div class="getal">${Math.round(bufferPct)} / 100</div>
+      </div>
+    `;
+  }
+
+  function startSimulatie() {
+    volgorde = [openingsGebeurtenis, ...schud(overigeGebeurtenissen).slice(0, 7)];
+    const kennisvragen = schud(kennisvragenPool).slice(0, 4);
+    const trivia = schud([0, 1, 2, 3]).slice(0, 2);
+    geldkeuzesLog = [];
+    state = { spaargeld: 0, beleggingen: 0, schuld: 0, studieschuld: 0, buffer: 50 };
+    vermogenGeschiedenis = [0];
+
+    programma = [];
+    volgorde.forEach((g, i) => {
+      programma.push({ type: 'gebeurtenis', gebeurtenis: g, volgNummer: i });
+      if (i === 0) programma.push({ type: 'kennisvraag', vraag: kennisvragen[0] });
+      if (i === 1) programma.push({ type: 'trivia', feit: triviaFeiten[trivia[0]] });
+      if (i === 2) programma.push({ type: 'kennisvraag', vraag: kennisvragen[1] });
+      if (i === 3) programma.push({ type: 'tussenbalans', nummer: 0 });
+      if (i === 4) programma.push({ type: 'kennisvraag', vraag: kennisvragen[2] });
+      if (i === 5) programma.push({ type: 'trivia', feit: triviaFeiten[trivia[1]] });
+      if (i === 6) programma.push({ type: 'kennisvraag', vraag: kennisvragen[3] });
+    });
+    programma.push({ type: 'reflectie' });
+    programmaPointer = 0;
+    toonHuidigeStap();
+  }
+
+  function toonHuidigeStap() {
+    const stap = programma[programmaPointer];
+    if (!stap) { toonEinde(); return; }
+    if (stap.type === 'gebeurtenis') { toonScherm('scherm-gebeurtenis'); toonGebeurtenis(stap); }
+    else if (stap.type === 'kennisvraag') { toonKennisvraag(stap); }
+    else if (stap.type === 'trivia') { toonTrivia(stap); }
+    else if (stap.type === 'tussenbalans') { toonTussenbalans(stap); }
+    else if (stap.type === 'reflectie') { toonScherm('scherm-reflectie'); }
+  }
+  function gaNaarVolgendeStap() { programmaPointer++; toonHuidigeStap(); }
+
+  function pasJaarlijkseGroeiToe() {
+    state.spaargeld *= (1 + RENTE_SPAREN / 100);
+    if (state.beleggingen > 0) state.beleggingen *= (1 + trekRendement() / 100);
+    if (state.schuld > 0) state.schuld *= (1 + RENTE_LENEN / 100);
+    if (state.studieschuld > 0) state.studieschuld *= (1 + RENTE_STUDIELENING / 100);
+  }
+
+  function toonGebeurtenis(stap) {
+    const g = stap.gebeurtenis;
+    stateSnapshot = { ...state };
+    huidigeKeuzeIndex = null;
+    renderHud();
+    document.getElementById('voortgang-tekst').textContent = `Jaar ${stap.volgNummer + 1} van ${volgorde.length}`;
+    const stappenEl = document.getElementById('stappen');
+    stappenEl.innerHTML = volgorde.map((_, i) => {
+      const klasse = i < stap.volgNummer ? 'gedaan' : (i === stap.volgNummer ? 'huidig' : '');
+      return `<div class="stap ${klasse}"></div>`;
+    }).join('');
+    document.getElementById('gebeurtenis-titel').textContent = g.titel;
+    document.getElementById('gebeurtenis-tekst').textContent = g.tekst;
+    document.getElementById('gevolg-vak').style.display = 'none';
+    document.getElementById('wissel-hint').style.display = 'none';
+    document.getElementById('btn-volgende').style.display = 'none';
+
+    const container = document.getElementById('keuzes-container');
+    container.innerHTML = '';
+    g.keuzes.forEach((k, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'keuze-knop';
+      btn.textContent = k.tekst;
+      btn.addEventListener('click', () => kiesOptie(g, i));
+      container.appendChild(btn);
+    });
+  }
+
+  function kiesOptie(gebeurtenis, index) {
+    huidigeKeuzeIndex = index;
+    state = { ...stateSnapshot };
+    const keuze = gebeurtenis.keuzes[index];
+    const gevolgTekst = keuze.voerUit(state);
+    state.buffer = Math.max(0, Math.min(100, state.buffer));
+
+    document.querySelectorAll('#keuzes-container .keuze-knop').forEach((b, i) => b.classList.toggle('gekozen', i === index));
+    document.getElementById('gevolg-vak').style.display = 'block';
+    document.getElementById('wissel-hint').style.display = 'block';
+    document.getElementById('gevolg-tekst').textContent = gevolgTekst;
+    document.getElementById('effect-lijst').innerHTML =
+      `<span>Vermogen na deze keuze: <b>${euro(vermogen(state))}</b></span>`;
+    document.getElementById('btn-volgende').style.display = 'inline-block';
+  }
+
+  document.getElementById('btn-volgende').addEventListener('click', () => {
+    const stap = programma[programmaPointer];
+    if (huidigeKeuzeIndex !== null) {
+      geldkeuzesLog.push({ titel: stap.gebeurtenis.titel, keuze: stap.gebeurtenis.keuzes[huidigeKeuzeIndex].tekst });
+      pasJaarlijkseGroeiToe();
+      vermogenGeschiedenis.push(vermogen(state));
+    }
+    gaNaarVolgendeStap();
+  });
+
+  function toonTrivia(stap) {
+    document.getElementById('trivia-tekst').textContent = stap.feit;
+    toonScherm('scherm-trivia');
+  }
+  document.getElementById('btn-trivia-verder').addEventListener('click', gaNaarVolgendeStap);
+
+  function toonTussenbalans(stap) {
+    const tb = tussenbalansen[stap.nummer];
+    document.getElementById('tussenbalans-titel').textContent = tb.titel;
+    document.getElementById('tussenbalans-tekst').textContent = tb.tekst;
+    document.getElementById('tussenbalans-antwoord').value = '';
+    renderHud('hud-tussenbalans');
+    toonScherm('scherm-tussenbalans');
+  }
+  document.getElementById('btn-tussenbalans-verder').addEventListener('click', gaNaarVolgendeStap);
+
+  function toonKennisvraag(stap) {
+    const vraag = stap.vraag;
+    document.getElementById('kennisvraag-tekst').textContent = vraag.vraag;
+    document.getElementById('kennisvraag-gevolg-vak').style.display = 'none';
+    document.getElementById('btn-kennisvraag-verder').style.display = 'none';
+    const container = document.getElementById('kennisvraag-opties');
+    container.innerHTML = '';
+    vraag.opties.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'keuze-knop';
+      btn.textContent = opt;
+      btn.addEventListener('click', () => beantwoordKennisvraag(vraag, i));
+      container.appendChild(btn);
+    });
+    toonScherm('scherm-kennisvraag');
+  }
+
+  function beantwoordKennisvraag(vraag, index) {
+    document.querySelectorAll('#kennisvraag-opties .keuze-knop').forEach((b, i) => {
+      b.classList.remove('goed', 'fout');
+      if (i === vraag.goedIndex) b.classList.add('goed');
+      else if (i === index) b.classList.add('fout');
+    });
+    document.getElementById('kennisvraag-gevolg-vak').style.display = 'block';
+    document.getElementById('kennisvraag-gevolg-tekst').textContent = index === vraag.goedIndex ? vraag.uitlegGoed : vraag.uitlegFout;
+    document.getElementById('btn-kennisvraag-verder').style.display = 'inline-block';
+  }
+  document.getElementById('btn-kennisvraag-verder').addEventListener('click', gaNaarVolgendeStap);
+
+  document.getElementById('btn-reflectie-verder').addEventListener('click', () => {
+    window._reflectie1 = document.getElementById('reflectie-antwoord1').value.trim();
+    window._reflectie2 = document.getElementById('reflectie-antwoord2').value.trim();
+    toonEinde();
+  });
+
+  /* ================= EINDSCHERM ================= */
+  function bepaalTitel(v, buffer) {
+    if (v <= -200) return { titel: "Diep in de schulden", emoji: "⚠️", uitleg: "Je leningen zijn harder gegroeid dan je spaargeld. Dat komt doordat rente op schulden vaak veel hoger is dan rente op sparen." };
+    if (buffer <= 20) return { titel: "Geen vangnet", emoji: "🕳️", uitleg: "Je hebt weinig achter de hand gehouden. Bij de eerstvolgende tegenvaller moet je waarschijnlijk lenen." };
+    const score = v * 0.3 + buffer * 3;
+    if (score >= 300) return { titel: "Een slimme spaarder", emoji: "🌱", uitleg: "Je hebt verstandig gespaard en/of belegd, en behield genoeg buffer om tegenvallers zelf op te vangen." };
+    if (score >= 150) return { titel: "Een degelijke start", emoji: "⚖️", uitleg: "Niet spectaculair, maar wel verstandig: je vermogen groeide en je hield het risico redelijk beperkt." };
+    return { titel: "Een wisselend jaar", emoji: "📉", uitleg: "Je hebt een aantal risico's genomen die niet allemaal goed uitpakten. Dat hoort bij leren omgaan met geld." };
+  }
+
+  function eindscore(v, buffer) {
+    return Math.max(0, Math.min(100, Math.round(50 + v / 15 + (buffer - 50) * 0.4)));
+  }
+
+  function tekenSamenstellingBalk() {
+    const onderdelen = [
+      { naam: 'Spaargeld', bedrag: Math.max(0, state.spaargeld), kleur: '#16324F' },
+      { naam: 'Beleggingen', bedrag: Math.max(0, state.beleggingen), kleur: '#A98134' },
+      { naam: 'Consumptieve schuld', bedrag: Math.max(0, state.schuld), kleur: '#9C3B34' },
+      { naam: 'Studieschuld', bedrag: Math.max(0, state.studieschuld), kleur: '#C98F86' },
+    ].filter(o => o.bedrag > 0.5);
+    const totaal = onderdelen.reduce((som, o) => som + o.bedrag, 0) || 1;
+    const balkHtml = onderdelen.map(o =>
+      `<div style="width:${(o.bedrag / totaal * 100).toFixed(1)}%; background:${o.kleur};" title="${o.naam}: ${euro(o.bedrag)}"></div>`
+    ).join('');
+    document.getElementById('samenstelling-balk').innerHTML =
+      `<div style="display:flex; height:22px; border-radius:4px; overflow:hidden; border:1px solid var(--perkament-donker);">${balkHtml || '<div style="width:100%; background:var(--perkament-donker);"></div>'}</div>`;
+    document.getElementById('samenstelling-legenda').innerHTML = onderdelen.length
+      ? onderdelen.map(o => `<span style="display:inline-block;width:10px;height:10px;background:${o.kleur};margin-right:4px;"></span>${o.naam}: ${euro(o.bedrag)}&nbsp; `).join('')
+      : 'Je hebt aan het eind geen spaargeld, beleggingen of schulden meer over.';
+  }
+
+  function tekenVerloopGrafiek() {
+    const w = 600, h = 160, pad = 24;
+    const n = vermogenGeschiedenis.length;
+    const min = Math.min(0, ...vermogenGeschiedenis);
+    const max = Math.max(1, ...vermogenGeschiedenis);
+    const x = i => pad + (i / (n - 1)) * (w - pad * 2);
+    const y = val => h - pad - ((val - min) / (max - min || 1)) * (h - pad * 2);
+    const punten = vermogenGeschiedenis.map((v, i) => `${x(i)},${y(v)}`).join(' ');
+    const stipjes = vermogenGeschiedenis.map((v, i) => `<circle cx="${x(i)}" cy="${y(v)}" r="3.5" fill="#16324F" />`).join('');
+    const nullijnY = y(0);
+    document.getElementById('verloop-grafiek').innerHTML = `
+      <svg viewBox="0 0 ${w} ${h}" style="width:100%; height:auto; display:block;">
+        <line x1="${pad}" y1="${nullijnY}" x2="${w - pad}" y2="${nullijnY}" stroke="#E8E1D0" stroke-width="1" stroke-dasharray="4 3" />
+        <polyline points="${punten}" fill="none" stroke="#16324F" stroke-width="2.5" />
+        ${stipjes}
+      </svg>
+    `;
+  }
+
+  function toonEinde() {
+    const v = vermogen(state);
+    const buffer = Math.max(0, Math.min(100, state.buffer));
+    const { titel, emoji, uitleg } = bepaalTitel(v, buffer);
+    document.getElementById('eind-emoji').textContent = emoji;
+    document.getElementById('eind-titel').textContent = titel;
+    document.getElementById('eind-uitleg').textContent = uitleg;
+    renderHud('eind-meters');
+
+    const score = eindscore(v, buffer);
+    document.getElementById('eind-score').textContent = score;
+    tekenSamenstellingBalk();
+    tekenVerloopGrafiek();
+
+    const spaardoelEl = document.getElementById('eind-spaardoel');
+    if (spaardoel && spaardoel.bedrag > 0) {
+      if (v >= spaardoel.bedrag) {
+        spaardoelEl.textContent = `Je koos als spaardoel "${spaardoel.tekst}" (${euro(spaardoel.bedrag)}). Met een eindvermogen van ${euro(v)} had je dat gehaald.`;
+      } else {
+        spaardoelEl.textContent = `Je koos als spaardoel "${spaardoel.tekst}" (${euro(spaardoel.bedrag)}). Met een eindvermogen van ${euro(v)} was je daar nog ${euro(spaardoel.bedrag - v)} van verwijderd.`;
+      }
+    } else if (spaardoel) {
+      spaardoelEl.textContent = `Je koos geen specifiek spaardoel, maar hield gewoon zoveel mogelijk over.`;
+    } else {
+      spaardoelEl.textContent = '';
+    }
+
+    document.getElementById('geldkeuzes-lijst').innerHTML =
+      geldkeuzesLog.map(item => `<li><b>${item.titel}</b>${item.keuze}</li>`).join('');
+
+    try {
+      const hoogsteRaw = localStorage.getItem('wereldspaardag2026:hoogste-score');
+      const hoogste = hoogsteRaw ? Number(hoogsteRaw) : 0;
+      const melding = document.getElementById('hoogste-melding');
+      if (score > hoogste) {
+        localStorage.setItem('wereldspaardag2026:hoogste-score', String(score));
+        melding.textContent = hoogste > 0 ? `Nieuw persoonlijk record! (was ${hoogste})` : 'Je eerste score is meteen je record.';
+      } else {
+        melding.textContent = `Jouw hoogste score op dit apparaat: ${hoogste}.`;
+      }
+    } catch (err) { console.warn('Kon score niet opslaan:', err); }
+
+    const keuzesTekst = geldkeuzesLog.map(item => `- ${item.titel}: ${item.keuze}`).join('\n');
+    window._laatsteResultaat = `Ik deed het werkblad "Groeigeld" en werd getiteld: ${titel} ${emoji}\nEindvermogen: ${euro(v)}, buffer: ${Math.round(buffer)}/100\nEindscore: ${score}. Kun jij het beter?\n\nMijn geldkeuzes:\n${keuzesTekst}`;
+    document.getElementById('kopieer-melding').textContent = '';
+    toonScherm('scherm-einde');
+  }
+
+  document.getElementById('btn-kopieer').addEventListener('click', async () => {
+    const melding = document.getElementById('kopieer-melding');
+    try {
+      await navigator.clipboard.writeText(window._laatsteResultaat || '');
+      melding.textContent = 'Gekopieerd! Plak het gerust ergens om te vergelijken met een klasgenoot.';
+    } catch (err) {
+      melding.textContent = window._laatsteResultaat || '';
+    }
+  });
+
+  document.getElementById('btn-opnieuw').addEventListener('click', () => {
+    dossierIndex = 0;
+    renderDossier();
+    spaardoel = null;
+    document.querySelectorAll('#spaardoel-opties .keuze-knop').forEach(b => b.classList.remove('gekozen'));
+    toonScherm('scherm-intro');
+  });
+</script>
+
+</body>
+</html>
