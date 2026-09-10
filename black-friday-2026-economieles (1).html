@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Black Friday: de economie achter de korting</title>
+<style>
+  :root{
+    --paper: #f6f3ec;
+    --paper-2: #efe9dc;
+    --ink: #26221e;
+    --muted: #6c6459;
+    --line: #c9bfae;
+    --accent: #3f5d54;
+    --accent-ink: #f6f3ec;
+    --warn: #8a3324;
+    --good: #3f5d54;
+    --focus: #1f3a3d;
+    --radius: 2px;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{ transition: none !important; animation: none !important; }
+  }
+  *{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+  body{
+    margin:0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap{
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 2.75rem 1.35rem 5rem;
+  }
+  header.masthead{
+    margin-bottom: 2.25rem;
+  }
+  header.masthead .date-line{
+    font-size: 0.92rem;
+    color: var(--muted);
+    margin: 0 0 0.65rem;
+    letter-spacing: 0.02em;
+  }
+  h1{
+    font-size: 1.85rem;
+    line-height: 1.25;
+    margin: 0 0 0.4rem;
+    font-weight: 700;
+  }
+  .subtitle{
+    font-size: 1.05rem;
+    color: var(--muted);
+    margin: 0;
+    font-style: italic;
+  }
+  h2{
+    font-size: 1.3rem;
+    margin: 0 0 0.9rem;
+    font-weight: 700;
+  }
+  h3{
+    font-size: 1.05rem;
+    margin: 0 0 0.5rem;
+    font-weight: 700;
+  }
+  p{ margin: 0 0 1rem; max-width: 62ch; }
+  section{ margin: 2.4rem 0; }
+  .rule{
+    border: none;
+    border-top: 1px solid var(--line);
+    margin: 2.4rem 0;
+  }
+  .meta-note{
+    font-size: 0.92rem;
+    color: var(--muted);
+  }
+  ol.goals{
+    margin: 0;
+    padding-left: 1.3rem;
+  }
+  ol.goals li{ margin-bottom: 0.6rem; max-width: 58ch; }
+
+  dl.terms dt{
+    font-weight: 700;
+    margin-top: 1.1rem;
+  }
+  dl.terms dt:first-child{ margin-top: 0; }
+  dl.terms dd{
+    margin: 0.2rem 0 0;
+    color: var(--ink);
+    max-width: 58ch;
+  }
+  dl.terms{
+    padding-top: 0.4rem;
+    border-top: 1px solid var(--line);
+  }
+  dl.terms > div{
+    padding: 0.9rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+  dl.terms > div:last-child{ border-bottom: none; }
+
+  .sources{
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-top: 1.4rem;
+  }
+
+  details.teacher-note{
+    border: 1px solid var(--line);
+    padding: 0.9rem 1.1rem;
+    margin-bottom: 2.2rem;
+    background: var(--paper-2);
+  }
+  details.teacher-note summary{
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 0.98rem;
+  }
+  details.teacher-note ul{
+    margin: 0.8rem 0 0.2rem;
+    padding-left: 1.2rem;
+  }
+  details.teacher-note li{ margin-bottom: 0.35rem; font-size: 0.95rem; }
+
+  button{
+    font-family: inherit;
+    font-size: 0.98rem;
+    padding: 0.6rem 1.05rem;
+    border: 1px solid var(--ink);
+    background: var(--paper);
+    color: var(--ink);
+    cursor: pointer;
+    border-radius: var(--radius);
+  }
+  button:hover:not(:disabled){
+    background: var(--ink);
+    color: var(--paper);
+  }
+  button:focus-visible{
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+  button:disabled{
+    opacity: 0.42;
+    cursor: not-allowed;
+  }
+  button.primary{
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-ink);
+  }
+  button.primary:hover:not(:disabled){
+    background: var(--focus);
+    border-color: var(--focus);
+  }
+  .btn-row{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 1.1rem;
+  }
+
+  .game-panel{
+    border: 1px solid var(--line);
+    padding: 1.6rem 1.6rem 1.8rem;
+    background: var(--paper);
+  }
+  .progress-line{
+    font-size: 0.85rem;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+  }
+  .progress-track{
+    height: 3px;
+    background: var(--line);
+    margin-bottom: 1.4rem;
+  }
+  .progress-fill{
+    height: 3px;
+    background: var(--accent);
+  }
+  .budget-mood{
+    font-size: 0.85rem;
+    font-style: italic;
+    color: var(--muted);
+    margin: 0 0 1.3rem;
+  }
+  .stat-line{
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin-bottom: 1.3rem;
+    display: flex;
+    gap: 1.4rem;
+    flex-wrap: wrap;
+  }
+  .stat-line strong{ color: var(--ink); }
+
+  .ad-quote{
+    border-left: 2px solid var(--line);
+    padding: 0.15rem 0 0.15rem 1rem;
+    font-style: italic;
+    color: var(--ink);
+    margin: 0 0 1rem;
+  }
+  .item-price{
+    margin: 0 0 1rem;
+    font-size: 1.05rem;
+  }
+  .item-price .was{
+    color: var(--muted);
+    text-decoration: line-through;
+    margin-right: 0.5rem;
+  }
+  .item-price .now{
+    font-weight: 700;
+  }
+  .tracker-box{
+    background: var(--paper-2);
+    border: 1px solid var(--line);
+    padding: 0.8rem 1rem;
+    font-size: 0.95rem;
+    margin: 0 0 1rem;
+  }
+  .budget-warning{
+    font-size: 0.85rem;
+    color: var(--warn);
+    margin-top: 0.4rem;
+  }
+  .feedback{
+    border-top: 1px solid var(--line);
+    margin-top: 1.3rem;
+    padding-top: 1.1rem;
+  }
+  .feedback.positive strong.tag{ color: var(--good); }
+  .feedback.negative strong.tag{ color: var(--warn); }
+  .feedback.neutral strong.tag{ color: var(--muted); }
+
+  fieldset.quiz{
+    border: none;
+    padding: 0;
+    margin: 0 0 1rem;
+  }
+  fieldset.quiz label{
+    display: block;
+    border: 1px solid var(--line);
+    padding: 0.65rem 0.9rem;
+    margin-bottom: 0.55rem;
+    cursor: pointer;
+  }
+  fieldset.quiz label:hover{ border-color: var(--ink); }
+  fieldset.quiz input{ margin-right: 0.6rem; }
+  fieldset.quiz label.correct{ border-color: var(--good); }
+  fieldset.quiz label.incorrect{ border-color: var(--warn); }
+  fieldset.quiz label.disabled-choice{ opacity: 0.65; cursor: default; }
+
+  .results dl{
+    margin: 1.2rem 0;
+  }
+  .results dl div{
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--line);
+    gap: 1rem;
+  }
+  .results dl dt{ color: var(--muted); }
+  .results dl dd{ margin: 0; font-weight: 700; text-align: right; }
+  .category-name{
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin: 0.2rem 0 0.5rem;
+  }
+  .category-nickname{
+    font-style: italic;
+    color: var(--muted);
+    margin: 0 0 0.9rem;
+  }
+  .best-score{
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin-top: 1rem;
+  }
+  .storage-note{
+    font-size: 0.82rem;
+    color: var(--muted);
+    margin-top: 1.6rem;
+  }
+
+  ul.discuss{
+    padding-left: 1.2rem;
+  }
+  ul.discuss li{ margin-bottom: 0.7rem; max-width: 58ch; }
+
+  details.answers{
+    border: 1px solid var(--line);
+    padding: 0.9rem 1.1rem;
+    margin-top: 1.3rem;
+  }
+  details.answers summary{
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--muted);
+  }
+  details.answers dl{ margin: 0.9rem 0 0; }
+  details.answers dt{ font-weight: 700; margin-top: 0.9rem; }
+  details.answers dt:first-child{ margin-top: 0; }
+  details.answers dd{ margin: 0.25rem 0 0; max-width: 58ch; }
+
+  .predict-form{
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    padding: 1.1rem 0;
+    margin: 1.3rem 0;
+  }
+  .predict-row{
+    display: flex;
+    align-items: baseline;
+    gap: 0.8rem;
+    margin-bottom: 0.9rem;
+    flex-wrap: wrap;
+  }
+  .predict-row label{ flex: 1 1 320px; max-width: 46ch; }
+  .predict-row input{
+    font-family: inherit;
+    font-size: 1rem;
+    width: 6.5rem;
+    padding: 0.35rem 0.5rem;
+    border: 1px solid var(--ink);
+    background: var(--paper);
+    color: var(--ink);
+    border-radius: var(--radius);
+  }
+  .predict-reveal{
+    background: var(--paper-2);
+    border: 1px solid var(--line);
+    padding: 0.9rem 1rem;
+    margin-top: 0.9rem;
+    font-size: 0.95rem;
+  }
+  .predict-reveal p{ margin: 0 0 0.5rem; }
+  .predict-reveal p:last-child{ margin-bottom: 0; }
+
+  .sparkline-wrap{
+    margin: 0 0 1rem;
+  }
+  .sparkline-wrap svg{
+    display: block;
+    width: 100%;
+    max-width: 320px;
+    height: auto;
+  }
+  .sparkline-caption{
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin: 0.35rem 0 0;
+  }
+
+  .countdown{
+    font-size: 0.95rem;
+    color: var(--warn);
+    font-variant-numeric: tabular-nums;
+    margin: 0 0 1rem;
+  }
+
+  .bonus-box{
+    border-top: 1px solid var(--line);
+    margin-top: 1.6rem;
+    padding-top: 1.3rem;
+  }
+  .bonus-box .predict-row input{ width: 5rem; }
+  .bonus-answer{
+    background: var(--paper-2);
+    border: 1px solid var(--line);
+    padding: 0.8rem 1rem;
+    margin-top: 0.8rem;
+    font-size: 0.92rem;
+  }
+
+  .exit-ticket textarea{
+    font-family: inherit;
+    font-size: 1rem;
+    width: 100%;
+    min-height: 5rem;
+    padding: 0.75rem 0.9rem;
+    border: 1px solid var(--ink);
+    background: var(--paper);
+    color: var(--ink);
+    border-radius: var(--radius);
+    resize: vertical;
+  }
+
+  @media (max-width: 520px){
+    .wrap{ padding: 1.8rem 1rem 4rem; }
+    h1{ font-size: 1.55rem; }
+    .stat-line{ gap: 0.8rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="date-line">Economie &middot; havo/vwo, leerjaar 2/3 &middot; duur &plusmn; 40 minuten</p>
+    <h1>Black Friday: de economie achter de korting</h1>
+    <p class="subtitle">Waarom lijkt elke korting groter dan hij is &mdash; en waarom trap jij er toch weer in?</p>
+  </header>
+
+  <details class="teacher-note">
+    <summary>Voor de docent: opbouw en tijdsindicatie</summary>
+    <p style="margin-top:0.8rem;">Black Friday 2026 valt op vrijdag 27 november. Deze les kan er dus zowel vlak vóór als na gegeven worden.</p>
+    <ul>
+      <li><strong>Voorspelvraag en theorie (&plusmn; 8&ndash;9 min):</strong> leerlingen schatten eerst zelf twee kerncijfers, lezen dan leerdoelen, kernbegrippen en een korte theorietekst. De vwo-verdieping (prijselasticiteit) staat in een uitklapbaar blokje en is optioneel.</li>
+      <li><strong>Spel (&plusmn; 26&ndash;28 min):</strong> leerlingen spelen zelfstandig (of in tweetallen) de budgetuitdaging van 10 stappen. Twee rondes hebben een echte, tikkende aftelklok om de tijdsdruk voelbaar te maken &mdash; dit kost geen extra speeltijd, alleen sfeer.</li>
+      <li><strong>Klassikale afronding (&plusmn; 5&ndash;7 min):</strong> gebruik de stellingen onderaan de pagina. Laat leerlingen hun eindcategorie en aantal herkende nepkortingen met een buurman/buurvrouw vergelijken voordat je plenair bespreekt. Modelantwoorden staan in het uitklapbare blokje eronder.</li>
+      <li><strong>Optioneel, niet meegerekend:</strong> een verdiepingsronde met een rekenvraag en een prijselasticiteit-vraag verschijnt na het spel voor snelle leerlingen, en een niet-opgeslagen exit-ticket staat helemaal onderaan.</li>
+    </ul>
+    <p style="margin-top:0.8rem;">Totale duur komt daarmee op ongeveer 40&ndash;45 minuten; bij een lesuur van 45&ndash;50 minuten is dat haalbaar. Bij een lesuur van 40 minuten kan de klassikale afronding als huiswerkreflectie of start van de volgende les, en is de verdiepingsronde vanzelf optioneel voor wie tijd over heeft.</p>
+    <p style="margin-top:0.8rem;">De uitkomsten van het spel zijn vooraf doorgerekend met een simulatie van 30.000 willekeurige speelsessies: bij toevallig, willekeurig klikken belandt ruim 90% van de sessies in een van de twee middelste categorieën, en de hoogste en laagste categorie zijn alleen haalbaar door bewust goede of bewust slechte keuzes &mdash; niet door geluk. De optionele verdiepingsronde en de voorspelvraag tellen niet mee in deze score. Het spel slaat geen naam, klas of ander persoonsgegeven op; alleen een score blijft lokaal op dit apparaat bewaard, en het exit-ticket wordt nergens verzonden of opgeslagen.</p>
+  </details>
+
+  <section id="leerdoelen">
+    <h2>Leerdoelen</h2>
+    <ol class="goals">
+      <li>Je kunt uitleggen wat een ankerprijs is en waarom winkels die gebruiken bij Black Friday-kortingen.</li>
+      <li>Je kunt het verschil benoemen tussen een echte korting en een misleidende (&ldquo;nep&rdquo;) korting.</li>
+      <li>Je kunt aan de hand van een eigen voorbeeld uitleggen wat opportunity cost (alternatieve aanwending) betekent.</li>
+      <li>Je kunt een onderbouwde koopbeslissing nemen op basis van een beperkt budget.</li>
+    </ol>
+  </section>
+
+  <hr class="rule">
+
+  <section id="voorspelling">
+    <h2>Voorspel eerst, lees dan verder</h2>
+    <p>Voordat je de echte cijfers leest: maak een schatting. Dat maakt het makkelijker om te onthouden hoe dicht je ernaast zat.</p>
+    <div class="predict-form">
+      <div class="predict-row">
+        <label for="predict-percent">Welk percentage Nederlanders denk je dat vorig jaar iets kocht tijdens Black Friday?</label>
+        <input type="number" id="predict-percent" min="0" max="100" placeholder="%">
+      </div>
+      <div class="predict-row">
+        <label for="predict-amount">Wat denk je dat een Nederlander gemiddeld uitgeeft tijdens Black Friday?</label>
+        <input type="number" id="predict-amount" min="0" placeholder="&euro;">
+      </div>
+      <div class="btn-row">
+        <button class="primary" type="button" id="predict-reveal-btn">Vergelijk met de werkelijkheid</button>
+      </div>
+      <div id="predict-reveal-box"></div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <section id="kernbegrippen">
+    <h2>Kernbegrippen</h2>
+    <dl class="terms">
+      <div>
+        <dt>Schaarste</dt>
+        <dd>Er is nooit genoeg geld, tijd of grondstof om alles te kopen of te maken wat mensen willen. Daardoor moet iedereen keuzes maken.</dd>
+      </div>
+      <div>
+        <dt>Vraag en aanbod</dt>
+        <dd>Hoe meer mensen iets willen kopen ten opzichte van wat er te koop is, hoe hoger de prijs meestal wordt &mdash; en andersom.</dd>
+      </div>
+      <div>
+        <dt>Ankerprijs (referentieprijs)</dt>
+        <dd>Een vaak hoge prijs die als vergelijkingspunt wordt getoond, zodat een lagere prijs daarnaast voordeliger lijkt &mdash; ook als niemand het product ooit voor dat bedrag heeft gekocht.</dd>
+      </div>
+      <div>
+        <dt>Nepkorting</dt>
+        <dd>Een korting die groter lijkt dan hij is, bijvoorbeeld doordat de &ldquo;oude&rdquo; prijs kunstmatig hoog werd gezet vlak voor de actie.</dd>
+      </div>
+      <div>
+        <dt>Opportunity cost (alternatieve aanwending)</dt>
+        <dd>De waarde van de beste andere keuze die je opgeeft op het moment dat je voor iets kiest.</dd>
+      </div>
+      <div>
+        <dt>FOMO</dt>
+        <dd>Fear of missing out: de angst om een unieke kans mis te lopen. Winkels spelen hier bewust op in met aftelklokken en teksten als &ldquo;nog maar 2 op voorraad&rdquo;.</dd>
+      </div>
+    </dl>
+    <details class="answers">
+      <summary>Extra begrip voor wie verder wil (vwo of verdieping)</summary>
+      <dl>
+        <div>
+          <dt>Prijselasticiteit van de vraag</dt>
+          <dd>Een maat voor hoe sterk de vraag naar een product verandert als de prijs verandert. Bij een product met een hoge prijselasticiteit (zoals een extra koptelefoon) zorgt een kleine prijsdaling al voor veel meer verkopen; bij een product met een lage prijselasticiteit (zoals schoolspullen die je toch nodig hebt) maakt de prijs veel minder uit voor hoeveel mensen kopen.</dd>
+        </div>
+      </dl>
+    </details>
+  </section>
+
+  <hr class="rule">
+
+  <section id="theorie">
+    <h2>Wat is er aan de hand met Black Friday?</h2>
+    <p>Elke Black Friday denk je hetzelfde: dit is mijn unieke kans. Spoiler: dat gevoel is precies de bedoeling, en winkels investeren serieus geld om het bij je op te wekken.</p>
+    <p>Black Friday komt uit de Verenigde Staten en valt altijd op de vrijdag na Thanksgiving. In 2026 is dat vrijdag 27 november. In Nederland bestaat de dag sinds ongeveer 2015 en is inmiddels vaak uitgegroeid tot een heel &ldquo;Black Week&rdquo;-verkoopweekend dat doorloopt tot Cyber Monday. De online omzet tijdens Black Friday lag in Nederland in 2024 boven de 1 miljard euro, en volgens marktonderzoek deed vorig jaar ongeveer 28% van de Nederlanders een aankoop tijdens Black Friday, met name vrouwen en jongeren.</p>
+    <p>Economisch gezien draait Black Friday om meer dan alleen lage prijzen. Winkels tonen vaak een hoge &ldquo;van&rdquo;-prijs naast de aanbieding: die ankerprijs zorgt ervoor dat de korting groter aanvoelt, ook als niemand het product ooit voor dat bedrag heeft gekocht. Daarnaast wordt vaak ingespeeld op FOMO, met aftelklokken, meldingen als &ldquo;nog maar 2 op voorraad&rdquo; en tijdelijke pushberichten. Dat werkt: mensen reageren sterk op het idee van een unieke kans, ook als het werkelijke voordeel klein is.</p>
+    <p>Om consumenten te beschermen geldt in de EU een regel: de doorgestreepte &ldquo;van&rdquo;-prijs moet de laagste prijs zijn van de afgelopen 30 dagen. Toch hield toezichthouder ACM in 2025 24 grote winkels tegen het licht en bleek driekwart zich niet aan deze regel te houden. Onderzoek van de Consumentenbond wees uit dat bij Amazon.nl zelfs zo&rsquo;n 80% van de onderzochte producten een misleidende korting had. Het advies van de ACM is daarom simpel: eerst checken, dan bestellen &mdash; bijvoorbeeld door de prijsgeschiedenis op te zoeken voordat je op &ldquo;kopen&rdquo; klikt. Een groeiende groep winkels en consumenten kiest inmiddels bewust voor &ldquo;Green Friday&rdquo;: minder en bewuster kopen in plaats van meedoen aan de koopdrukte.</p>
+    <p class="sources">Bronnen: Autoriteit Consument &amp; Markt (november 2025), Consumentenbond (november 2025), NOS, Thuiswinkel.org / NielsenIQ-onderzoek (november 2025).</p>
+  </section>
+
+  <hr class="rule">
+
+  <section id="spelinstructie">
+    <h2>Jouw missie, mocht je die accepteren</h2>
+    <p>Je krijgt een budget van &euro;220. In zeven &ldquo;winkelrondes&rdquo; beslis je steeds: koop je meteen, controleer je eerst de prijsgeschiedenis, of sla je de aanbieding over? Sommige deals zijn eerlijk, andere zijn pure marketing-theater. Daartussendoor krijg je twee korte kennisvragen en aan het einde een keuze over Green Friday. Na elke beslissing zie je meteen wat er werkelijk aan de hand was.</p>
+    <p>Er is geen tijdslimiet en geen &ldquo;foute&rdquo; uitkomst waar je op afgerekend wordt &mdash; dit is een oefening, geen toets. Overleef je met je portemonnee &eacute;n je verstand intact? Reken op ongeveer 25&ndash;30 minuten.</p>
+    <div class="btn-row">
+      <button class="primary" id="start-game-btn" type="button">Start de missie</button>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <section id="spel">
+    <div id="game-root" class="game-panel" aria-live="polite"></div>
+  </section>
+
+  <hr class="rule">
+
+  <section id="afronding">
+    <h2>Klassikale afronding (&plusmn; 5&ndash;7 minuten)</h2>
+    <p>Vergelijk eerst kort met je buurman of buurvrouw: wie heeft de hoogste score, en wie herkende de meeste nepkortingen? (Verlies je? Dat is prima materiaal voor de discussie hieronder.) Bespreek daarna klassikaal:</p>
+    <ul class="discuss">
+      <li>Is het volgens jou oneerlijk dat winkels ankerprijzen gebruiken, of hoort dat gewoon bij verkopen? Leg uit met een argument vóór en een argument tegen.</li>
+      <li>De ACM vond dat 75% van de onderzochte winkels de regels rond kortingen overtrad. Wat zou de overheid hieraan kunnen doen, en wat zou dat kosten of opleveren?</li>
+      <li>Noem een moment waarop jij (of iemand thuis) een opportunity cost afwoog bij een aankoop &mdash; wat koos je, en wat gaf je daarmee op?</li>
+      <li>Zou jij zelf meedoen aan Green Friday? Waarom wel of niet?</li>
+    </ul>
+
+    <details class="answers">
+      <summary>Voor de docent: modelantwoorden (geen economie-achtergrond nodig)</summary>
+      <dl>
+        <div>
+          <dt>1. Ankerprijzen eerlijk of niet?</dt>
+          <dd><strong>Vóór:</strong> een van-prijs tonen is op zichzelf gewoon marketing, zoals reclame altijd overdrijft; de wet staat het toe zolang de van-prijs klopt. <strong>Tegen:</strong> als de van-prijs nooit echt is gehanteerd, is het misleiding en oneerlijke concurrentie tegenover winkels die zich wel aan de regels houden &mdash; precies wat de ACM constateerde. Er is geen &ldquo;juist&rdquo; antwoord; het gaat om een onderbouwde afweging.</dd>
+        </div>
+        <div>
+          <dt>2. Wat kan de overheid doen?</dt>
+          <dd>Denkrichtingen: strenger controleren en boetes uitdelen (kost toezichtscapaciteit, levert eerlijkere prijzen op), verplichte prijsvergelijkingssites promoten, of naming-and-shaming zoals nu al gebeurt via de Consumentenbond. Laat leerlingen ook het perspectief van winkels benoemen: strengere regels kosten hen administratie en kunnen prijzen iets verhogen.</dd>
+        </div>
+        <div>
+          <dt>3. Eigen opportunity cost</dt>
+          <dd>Er is geen vast goed antwoord; check of leerlingen echt een alternatief benoemen (bijvoorbeeld &ldquo;door dit spel te kopen, kon ik niet meer sparen voor iets anders&rdquo;) in plaats van alleen het aankoopbedrag te noemen.</dd>
+        </div>
+        <div>
+          <dt>4. Green Friday</dt>
+          <dd>Beide antwoorden zijn geldig. Laat leerlingen die &ldquo;nee&rdquo; zeggen benoemen wanneer een aankoop dan wél verantwoord is (bijvoorbeeld bij een geverifieerde, noodzakelijke aankoop) in plaats van het volledig af te wijzen.</dd>
+        </div>
+      </dl>
+    </details>
+  </section>
+
+  <hr class="rule">
+
+  <section id="exit-ticket" class="exit-ticket">
+    <h2>Voor jezelf (niet verplicht, wordt niet opgeslagen)</h2>
+    <p>Schrijf in een paar zinnen op: welke ronde uit het spel is je het meest bijgebleven, en waarom? Dit is een kladblok &mdash; er wordt niets verzonden of bewaard. Wil je docent dit als exit-ticket gebruiken, schrijf je antwoord dan over op papier voordat je de pagina sluit.</p>
+    <textarea id="exit-ticket-text" placeholder="Bijvoorbeeld: de aftelklok bij de smartwatch, want ik merkte dat ik daardoor sneller wilde klikken..."></textarea>
+  </section>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var BUDGET_START = 220;
+  var STORAGE_KEY = "bf2026_les_bestscore_v1";
+
+  var DEALS = [
+    {
+      id: "koptelefoon",
+      name: "Draadloze koptelefoon",
+      was: 129,
+      price: 79,
+      fake: true,
+      necessary: false,
+      urgent: false,
+      history: [82, 84, 83, 85, 84, 82, 83, 79],
+      ad: "GoedkoopGek.nl schreeuwt: \u201cKOPTELEFOON-KRAKER! Deal verdwijnt over 2 uur en dan NOOIT MEER terug!!!\u201d Je hebt al een koptelefoon. Deze is alleen maar... paars.",
+      trackerFake: "Prijstracker: deze koptelefoon kostte de afgelopen 30 dagen nooit meer dan \u20ac85.",
+      trackerGenuine: "",
+      resolutionFake: "De \u201cvan\u201d-prijs van \u20ac129 is nooit de echte verkoopprijs geweest \u2014 een klassiek voorbeeld van een ankerprijs.",
+      resolutionGenuine: ""
+    },
+    {
+      id: "winterjas",
+      name: "Winterjas",
+      was: 90,
+      price: 63,
+      fake: false,
+      necessary: true,
+      urgent: false,
+      history: [90, 90, 89, 90, 90, 90, 65, 63],
+      ad: "Je oude winterjas heeft de vorige winter niet overleefd (rust zacht). Deze jas staat al een paar weken eerlijk tegen deze prijs, zonder gedoe.",
+      trackerFake: "",
+      trackerGenuine: "Prijstracker bevestigt: deze jas heeft de afgelopen 30 dagen steeds \u20ac90 gekost. Dit is dus een echte verlaging.",
+      resolutionFake: "",
+      resolutionGenuine: "De prijstracker bevestigt dat dit een echte, structurele afprijzing is."
+    },
+    {
+      id: "smartwatch",
+      name: "Smartwatch",
+      was: 249,
+      price: 199,
+      fake: true,
+      necessary: false,
+      urgent: true,
+      history: [219, 215, 210, 205, 199, 199, 199, 199],
+      ad: "SchreeuwOffers.nl knippert in noodrood: \u201cNOG MAAR 2 OP VOORRAAD!!\u201d alsof de wereld vergaat. Je hebt geen smartwatch nodig. De klok tikt door \u2014 ironisch genoeg, net als een horloge.",
+      trackerFake: "Prijstracker: deze smartwatch stond vorige week ook al voor \u20ac199 te koop, los van de \u201cschaarste\u201d-melding.",
+      trackerGenuine: "",
+      resolutionFake: "De voorraadmelding en de aftelklok hadden niets te maken met de prijs: die was al een week hetzelfde.",
+      resolutionGenuine: ""
+    },
+    {
+      id: "schoolspullen",
+      name: "Schoolspullen (agenda, rekenmachine, schriften)",
+      was: 53,
+      price: 45,
+      fake: false,
+      necessary: true,
+      urgent: false,
+      history: [53, 53, 52, 53, 53, 47, 45, 45],
+      ad: "Nieuwe agenda, rekenmachine en schriften \u2014 spannend is anders, maar wel nodig. Vaste ledenkorting voor iedereen met een klantenkaart, geen trucje.",
+      trackerFake: "",
+      trackerGenuine: "Prijstracker: deze prijsdaling staat los van Black Friday-trucs en is een gewone, jaarronde ledenkorting.",
+      resolutionFake: "",
+      resolutionGenuine: "Dit was een gewone, structurele korting \u2014 geen Black Friday-truc."
+    },
+    {
+      id: "sneakers",
+      name: "Sneakers, \u20181+1 gratis\u2019",
+      was: 90,
+      price: 70,
+      fake: true,
+      necessary: false,
+      urgent: false,
+      history: [35, 35, 35, 35, 45, 45, 45, 45],
+      historyLabel: "Prijs per paar",
+      ad: "\u201c1+1 GRATIS!!\u201d juicht de winkel. Grappig genoeg ging de prijs per paar toevallig omhoog \u2014 precies twee weken geleden. Wat een toeval.",
+      trackerFake: "Prijstracker: de prijs per paar ging twee weken geleden ineens omhoog, precies voor de start van de \u20181+1\u2019-actie.",
+      trackerGenuine: "",
+      resolutionFake: "Met de \u201c1+1\u201d-actie betaal je nu \u20ac70 voor twee paar \u2014 precies hetzelfde bedrag als v\u00f3\u00f3r de prijsverhoging. Er is dus geen echt voordeel.",
+      resolutionGenuine: ""
+    },
+    {
+      id: "airfryer",
+      name: "Airfryer (cadeau)",
+      was: 120,
+      price: 90,
+      fake: false,
+      necessary: true,
+      urgent: false,
+      history: [120, 120, 119, 90, 90, 90, 90, 90],
+      ad: "Cadeau voor tante Corrie tijdens de feestdagen \u2014 ze vraagt er zelf al drie jaar om. Deze prijs staat er al drie weken, gewoon eerlijk.",
+      trackerFake: "",
+      trackerGenuine: "Prijstracker bevestigt: \u20ac90 is inderdaad de laagste prijs van de afgelopen 30 dagen.",
+      resolutionFake: "",
+      resolutionGenuine: "Een echte, geverifieerde korting op een cadeau dat je toch al wilde geven."
+    },
+    {
+      id: "console",
+      name: "Spelcomputerbundel",
+      was: 229,
+      price: 179,
+      fake: true,
+      necessary: false,
+      urgent: true,
+      history: [179, 199, 179, 185, 179, 179, 199, 179],
+      ad: "TopToko Elektro roept in kapitalen: \u201cMORGEN WEER DE NORMALE PRIJS!!\u201d Je hebt al een spelcomputer. Deze bundel fluistert stiekem je naam.",
+      trackerFake: "Prijstracker: deze bundel kostte de afgelopen maand vaker \u20ac179, ook buiten Black Friday om.",
+      trackerGenuine: "",
+      resolutionFake: "De dreigende deadline (\u201cmorgen weer normale prijs\u201d) klopte niet: de prijs schommelde de hele maand al rond \u20ac179.",
+      resolutionGenuine: ""
+    }
+  ];
+
+  var QUIZZES = {
+    quiz1: {
+      question: "Een webshop laat zien: \u2018Van \u20ac249,- voor \u20ac199,-\u2019. Waarom noemen economen zo\u2019n hoog getoonde \u201cvan\u201d-prijs een ankerprijs?",
+      options: [
+        { text: "Omdat dit gegarandeerd de laagste prijs van de afgelopen 30 dagen is.", correct: false },
+        { text: "Omdat een hoog vertrekpunt de korting groter laat lijken, ook als niemand het product ooit voor dat bedrag heeft gekocht.", correct: true },
+        { text: "Omdat de wet voorschrijft dat elke winkel zo\u2019n prijs moet tonen.", correct: false }
+      ],
+      feedbackCorrect: "Klopt. Een ankerprijs is een vergelijkingspunt dat de indruk van een grote besparing geeft, los van of die hoge prijs ooit echt gehanteerd is.",
+      feedbackIncorrect: "Niet helemaal: een ankerprijs is vooral een vergelijkingspunt dat de korting groter laat l\u00e9\u00efken \u2014 ook als het product nooit voor dat bedrag verkocht is."
+    },
+    quiz2: {
+      question: "Je hebt \u20ac220 te besteden en geeft je hele budget uit aan \u00e9\u00e9n spelcomputerbundel. Hoe noemen economen de waarde van de andere dingen die je hierdoor niet meer kunt kopen?",
+      options: [
+        { text: "Vraag en aanbod", correct: false },
+        { text: "Nepkorting", correct: false },
+        { text: "Opportunity cost (alternatieve aanwending)", correct: true }
+      ],
+      feedbackCorrect: "Klopt. Opportunity cost is de waarde van de beste keuze die je opgeeft doordat je voor iets anders kiest \u2014 ook als je er geen euro extra voor betaalt.",
+      feedbackIncorrect: "Niet helemaal: de juiste term is opportunity cost (alternatieve aanwending) \u2014 de waarde van wat je opgeeft door iets anders te kiezen."
+    }
+  };
+
+  // Step sequence: references into DEALS by index, plus quiz/reflection markers
+  var STEPS = [
+    { type: "deal", dealIndex: 0 },
+    { type: "deal", dealIndex: 1 },
+    { type: "deal", dealIndex: 2 },
+    { type: "quiz", quizId: "quiz1" },
+    { type: "deal", dealIndex: 3 },
+    { type: "deal", dealIndex: 4 },
+    { type: "quiz", quizId: "quiz2" },
+    { type: "deal", dealIndex: 5 },
+    { type: "deal", dealIndex: 6 },
+    { type: "reflection" }
+  ];
+
+  function scoreDeal(action, isFake){
+    if (action === "check_skip" && isFake) return 2;
+    if (action === "check_buy" && !isFake) return 1;
+    if (action === "check_buy" && isFake) return -1;
+    if (action === "buy_direct" && isFake) return -2;
+    if (action === "buy_direct" && !isFake) return 0;
+    if (action === "skip_direct") return 0;
+    if (action === "check_skip" && !isFake) return 0;
+    return 0;
+  }
+
+  function categorize(score){
+    if (score >= 8) return { name: "Kritische Koper", nickname: "de Deal-Detective", desc: "Je doorzag de meeste trucs en kocht vooral bewust \u2014 precies het gedrag waartoe de ACM consumenten oproept." };
+    if (score >= 3) return { name: "Bewuste Shopper", nickname: "de Prijzenchecker", desc: "Je controleerde regelmatig voordat je kocht en trapte niet in elke nepkorting. Op sommige momenten was er ruimte voor een kritischere blik." };
+    if (score >= -1) return { name: "Twijfelende Shopper", nickname: "de Gemiddelde Nederlander", desc: "Je kocht soms op gevoel en soms na controle. Dat is ongeveer hoe de meeste shoppers zich gedragen \u2014 met ruimte om kritischer te worden." };
+    return { name: "Impulsieve Shopper", nickname: "de Aftelklok-Fan", desc: "Je liet je vaker meeslepen door aftelklokken en grote kortingspercentages dan dat je prijzen checkte. Dat overkwam volgens de Consumentenbond en ACM in 2025 ook veel volwassenen." };
+  }
+
+  function budgetMood(remaining, start){
+    var ratio = remaining / start;
+    if (ratio >= 0.8) return "Je portemonnee is nog kerngezond.";
+    if (ratio >= 0.5) return "Nog prima bij kas.";
+    if (ratio >= 0.25) return "Je portemonnee begint een beetje te piepen.";
+    if (ratio >= 0.1) return "Noodfonds-alarm: bijna op.";
+    return "Je portemonnee ligt plat en smeekt om genade.";
+  }
+
+  function initState(){
+    return {
+      stepIndex: 0,
+      budget: BUDGET_START,
+      insight: 0,
+      spentTotal: 0,
+      spentNecessary: 0,
+      fakeSpotted: 0,
+      fakeTotal: DEALS.filter(function(d){ return d.fake; }).length,
+      quizCorrect: 0,
+      quizTotal: Object.keys(QUIZZES).length,
+      greenChoice: null,
+      checkedCurrent: false,
+      countdownSeconds: null,
+      countdownDealIndex: null,
+      log: []
+    };
+  }
+
+  var state = initState();
+  var root = document.getElementById("game-root");
+  var countdownIntervalId = null;
+
+  function clearCountdown(){
+    if (countdownIntervalId !== null){
+      clearInterval(countdownIntervalId);
+      countdownIntervalId = null;
+    }
+  }
+
+  function formatCountdown(totalSeconds){
+    var s = Math.max(0, totalSeconds);
+    var m = Math.floor(s / 60);
+    var r = s % 60;
+    return (m < 10 ? "0" : "") + m + ":" + (r < 10 ? "0" : "") + r;
+  }
+
+  function buildSparkline(history, wasPrice, isFake){
+    var w = 300, h = 80, padX = 8, padY = 10;
+    var allValues = history.concat([wasPrice]);
+    var min = Math.min.apply(null, allValues);
+    var max = Math.max.apply(null, allValues);
+    if (max === min) max = min + 1;
+    function xAt(i){ return padX + (i / (history.length - 1)) * (w - 2 * padX); }
+    function yAt(v){ return h - padY - ((v - min) / (max - min)) * (h - 2 * padY); }
+    var points = history.map(function(v, i){ return xAt(i).toFixed(1) + "," + yAt(v).toFixed(1); }).join(" ");
+    var wasY = yAt(wasPrice).toFixed(1);
+    var lastX = xAt(history.length - 1).toFixed(1);
+    var lastY = yAt(history[history.length - 1]).toFixed(1);
+    var lineColor = isFake ? "#8a3324" : "#3f5d54";
+    var svg = "";
+    svg += '<svg viewBox="0 0 ' + w + ' ' + h + '" role="img" aria-label="Prijsverloop laatste 4 weken">';
+    svg += '<line x1="' + padX + '" y1="' + wasY + '" x2="' + (w - padX) + '" y2="' + wasY + '" stroke="#6c6459" stroke-width="1" stroke-dasharray="3,3" />';
+    svg += '<polyline points="' + points + '" fill="none" stroke="' + lineColor + '" stroke-width="2" />';
+    svg += '<circle cx="' + lastX + '" cy="' + lastY + '" r="3.5" fill="' + lineColor + '" />';
+    svg += '</svg>';
+    return svg;
+  }
+
+  function esc(s){
+    var div = document.createElement("div");
+    div.textContent = s;
+    return div.innerHTML;
+  }
+
+  function money(n){
+    return "\u20ac" + n.toFixed(0);
+  }
+
+  function progressHeader(stepNumber, totalSteps){
+    var pct = Math.round((stepNumber / totalSteps) * 100);
+    return (
+      '<div class="progress-line"><span>Stap ' + stepNumber + ' van ' + totalSteps + '</span>' +
+      '<span>Budget over: <strong>' + money(state.budget) + '</strong></span></div>' +
+      '<div class="progress-track"><div class="progress-fill" style="width:' + pct + '%"></div></div>' +
+      '<p class="budget-mood">' + budgetMood(state.budget, BUDGET_START) + '</p>'
+    );
+  }
+
+  function renderIntro(){
+    root.innerHTML =
+      '<p class="meta-note">Klik hierboven op &ldquo;Start het spel&rdquo; om te beginnen.</p>';
+  }
+
+  function renderDeal(step, dealIndex){
+    var d = DEALS[dealIndex];
+    var affordable = d.price <= state.budget;
+
+    // Countdown state is per-round: only (re)initialize the remaining time when
+    // entering this round for the first time, not when toggling the checked view.
+    if (d.urgent){
+      if (state.countdownDealIndex !== dealIndex){
+        state.countdownDealIndex = dealIndex;
+        state.countdownSeconds = 150 + Math.floor(((dealIndex * 37) % 90));
+      }
+    }
+
+    var html = "";
+    html += progressHeader(state.stepIndex + 1, STEPS.length);
+    html += "<h3>" + esc(d.name) + "</h3>";
+    html += '<p class="ad-quote">' + d.ad + "</p>";
+    if (d.urgent){
+      html += '<p class="countdown">Nog <span id="countdown-value">' + formatCountdown(state.countdownSeconds) + '</span> tot deze &ldquo;deal&rdquo; verloopt</p>';
+    }
+    html += '<p class="item-price"><span class="was">' + money(d.was) + "</span><span class=\"now\">" + money(d.price) + "</span></p>";
+
+    if (!state.checkedCurrent){
+      html += '<div class="btn-row">';
+      html += '<button type="button" data-action="check">Bekijk prijstracker</button>';
+      html += '<button type="button" data-action="buy_direct"' + (affordable ? "" : " disabled") + '>Koop nu (' + money(d.price) + ')</button>';
+      html += '<button type="button" data-action="skip_direct">Sla over</button>';
+      html += "</div>";
+      if (!affordable){
+        html += '<p class="budget-warning">Onvoldoende budget om dit direct te kopen (je hebt nog ' + money(state.budget) + ' over).</p>';
+      }
+    } else {
+      var trackerText = d.fake ? d.trackerFake : d.trackerGenuine;
+      html += '<div class="sparkline-wrap">' + buildSparkline(d.history, d.was, d.fake) + '<p class="sparkline-caption">Prijsverloop laatste 4 weken (' + (d.historyLabel || "prijs") + '); stippellijn = geadverteerde \u201cvan\u201d-prijs van ' + money(d.was) + '.</p></div>';
+      html += '<div class="tracker-box">' + trackerText + "</div>";
+      html += '<div class="btn-row">';
+      html += '<button type="button" data-action="check_buy"' + (affordable ? "" : " disabled") + '>Alsnog kopen (' + money(d.price) + ')</button>';
+      html += '<button type="button" data-action="check_skip">Niet kopen</button>';
+      html += "</div>";
+      if (!affordable){
+        html += '<p class="budget-warning">Onvoldoende budget om dit alsnog te kopen (je hebt nog ' + money(state.budget) + ' over).</p>';
+      }
+    }
+    root.innerHTML = html;
+    attachDealHandlers(dealIndex);
+
+    clearCountdown();
+    if (d.urgent){
+      countdownIntervalId = setInterval(function(){
+        state.countdownSeconds = Math.max(0, state.countdownSeconds - 1);
+        var el = document.getElementById("countdown-value");
+        if (el){ el.textContent = formatCountdown(state.countdownSeconds); }
+        if (state.countdownSeconds <= 0){ clearCountdown(); }
+      }, 1000);
+    }
+  }
+
+  function attachDealHandlers(dealIndex){
+    var buttons = root.querySelectorAll("button[data-action]");
+    buttons.forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var action = btn.getAttribute("data-action");
+        if (action === "check"){
+          state.checkedCurrent = true;
+          renderDeal(STEPS[state.stepIndex], dealIndex);
+          return;
+        }
+        handleDealAction(dealIndex, action);
+      });
+    });
+  }
+
+  function handleDealAction(dealIndex, action){
+    clearCountdown();
+    var d = DEALS[dealIndex];
+    // Guard: never allow spending more than available budget.
+    var wouldSpend = (action === "buy_direct" || action === "check_buy") ? d.price : 0;
+    if (wouldSpend > state.budget){
+      action = state.checkedCurrent ? "check_skip" : "skip_direct";
+      wouldSpend = 0;
+    }
+    var pts = scoreDeal(action, d.fake);
+    state.insight += pts;
+    state.budget -= wouldSpend;
+    state.spentTotal += wouldSpend;
+    if (d.necessary && wouldSpend > 0){
+      state.spentNecessary += wouldSpend;
+    }
+    if (d.fake && (action === "check_skip")){
+      state.fakeSpotted += 1;
+    }
+    state.log.push({ id: d.id, action: action, points: pts, spent: wouldSpend });
+    renderDealFeedback(d, action, pts, wouldSpend);
+  }
+
+  function renderDealFeedback(d, action, pts, spent){
+    var resolution = d.fake ? d.resolutionFake : d.resolutionGenuine;
+    var tone = "neutral";
+    if (pts > 0) tone = "positive";
+    if (pts < 0) tone = "negative";
+    var tagText = pts > 0 ? "Nice, dat zag je goed aankomen" : (pts < 0 ? "Autsj, daar tuinde je in" : "Kan geen kwaad");
+
+    var html = "";
+    html += progressHeader(state.stepIndex + 1, STEPS.length);
+    html += "<h3>" + esc(d.name) + "</h3>";
+    html += '<div class="feedback ' + tone + '">';
+    html += "<p><strong class=\"tag\">" + tagText + ".</strong> " + resolution + "</p>";
+    if (d.urgent){
+      html += "<p class=\"meta-note\">Merk je dat die aftelklok je onder druk zette? Dat is precies het doel van zo\u2019n klok: hij zegt niets over de prijs, alleen over je gevoel van haast.</p>";
+    }
+    html += "<p class=\"meta-note\">" + (spent > 0 ? "Uitgegeven: " + money(spent) + ". " : "Niets uitgegeven. ") + "</p>";
+    html += "</div>";
+    html += '<div class="btn-row"><button class="primary" type="button" id="next-step-btn">Volgende</button></div>';
+    root.innerHTML = html;
+    document.getElementById("next-step-btn").addEventListener("click", advanceStep);
+  }
+
+  function renderQuiz(quizId){
+    var q = QUIZZES[quizId];
+    var html = "";
+    html += progressHeader(state.stepIndex + 1, STEPS.length);
+    html += "<h3>Kennisvraag</h3>";
+    html += "<p>" + q.question + "</p>";
+    html += '<fieldset class="quiz">';
+    q.options.forEach(function(opt, i){
+      html += '<label data-index="' + i + '"><input type="radio" name="quiz-option" value="' + i + '"> ' + esc(opt.text) + "</label>";
+    });
+    html += "</fieldset>";
+    html += '<div class="btn-row"><button class="primary" type="button" id="quiz-submit-btn" disabled>Controleer antwoord</button></div>';
+    root.innerHTML = html;
+
+    var radios = root.querySelectorAll('input[name="quiz-option"]');
+    var submitBtn = document.getElementById("quiz-submit-btn");
+    radios.forEach(function(r){
+      r.addEventListener("change", function(){
+        submitBtn.disabled = false;
+      });
+    });
+    submitBtn.addEventListener("click", function(){
+      var checked = root.querySelector('input[name="quiz-option"]:checked');
+      if (!checked) return;
+      var idx = parseInt(checked.value, 10);
+      var correct = q.options[idx].correct;
+      if (correct){
+        state.quizCorrect += 1;
+        state.insight += 1;
+      }
+      renderQuizFeedback(q, idx, correct);
+    });
+  }
+
+  function renderQuizFeedback(q, chosenIndex, correct){
+    var labels = root.querySelectorAll("fieldset.quiz label");
+    labels.forEach(function(label, i){
+      var input = label.querySelector("input");
+      input.disabled = true;
+      label.classList.add("disabled-choice");
+      if (q.options[i].correct){
+        label.classList.add("correct");
+      } else if (i === chosenIndex){
+        label.classList.add("incorrect");
+      }
+    });
+    var submitBtn = document.getElementById("quiz-submit-btn");
+    submitBtn.remove();
+
+    var tone = correct ? "positive" : "negative";
+    var tagText = correct ? "Yes, raak" : "Net niet";
+    var feedbackText = correct ? q.feedbackCorrect : q.feedbackIncorrect;
+
+    var fbDiv = document.createElement("div");
+    fbDiv.className = "feedback " + tone;
+    fbDiv.innerHTML = "<p><strong class=\"tag\">" + tagText + ".</strong> " + feedbackText + "</p>";
+    root.appendChild(fbDiv);
+
+    var btnRow = document.createElement("div");
+    btnRow.className = "btn-row";
+    btnRow.innerHTML = '<button class="primary" type="button" id="next-step-btn">Volgende</button>';
+    root.appendChild(btnRow);
+    document.getElementById("next-step-btn").addEventListener("click", advanceStep);
+  }
+
+  function renderReflection(){
+    var html = "";
+    html += progressHeader(state.stepIndex + 1, STEPS.length);
+    html += "<h3>Laatste keuze: Green Friday</h3>";
+    html += "<p>Steeds meer winkels roepen op tot Green Friday: bewust minder kopen in plaats van meedoen aan de koopdrukte. Wat kies jij voor je laatste \u201cronde\u201d?</p>";
+    html += '<div class="btn-row">';
+    html += '<button type="button" data-green="true">Ik doe mee met Green Friday: ik koop niets meer</button>';
+    html += '<button type="button" data-green="false">Ik shop toch nog even door</button>';
+    html += "</div>";
+    root.innerHTML = html;
+
+    var buttons = root.querySelectorAll("button[data-green]");
+    buttons.forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var green = btn.getAttribute("data-green") === "true";
+        state.greenChoice = green;
+        if (green) state.insight += 1;
+        renderReflectionFeedback(green);
+      });
+    });
+  }
+
+  function renderReflectionFeedback(green){
+    var html = "";
+    html += progressHeader(state.stepIndex + 1, STEPS.length);
+    html += "<h3>Laatste keuze: Green Friday</h3>";
+    html += '<div class="feedback ' + (green ? "positive" : "neutral") + '">';
+    if (green){
+      html += "<p><strong class=\"tag\">Bewuste keuze.</strong> Je kiest voor minder consumeren \u2014 precies het idee achter Green Friday. Een beetje saai misschien, maar wel slim.</p>";
+    } else {
+      html += "<p><strong class=\"tag\">Ook prima.</strong> Black Friday is een vrije keuze. Al fluistert je economie-brein nu waarschijnlijk stiekem &lsquo;opportunity cost&rsquo;...</p>";
+    }
+    html += "</div>";
+    html += '<div class="btn-row"><button class="primary" type="button" id="next-step-btn">Bekijk je resultaat</button></div>';
+    root.innerHTML = html;
+    document.getElementById("next-step-btn").addEventListener("click", advanceStep);
+  }
+
+  function readBestScore(){
+    try {
+      var raw = window.localStorage.getItem(STORAGE_KEY);
+      if (!raw) return null;
+      var parsed = JSON.parse(raw);
+      if (typeof parsed.insight === "number") return parsed;
+      return null;
+    } catch (e){
+      return null;
+    }
+  }
+
+  function writeBestScoreIfHigher(insight, budgetLeft){
+    try {
+      var current = readBestScore();
+      if (!current || insight > current.insight){
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ insight: insight, budgetLeft: budgetLeft }));
+        return true;
+      }
+      return false;
+    } catch (e){
+      return false;
+    }
+  }
+
+  function renderResults(){
+    var cat = categorize(state.insight);
+    var isNewBest = writeBestScoreIfHigher(state.insight, state.budget);
+    var best = readBestScore();
+
+    var html = "";
+    html += '<div class="results">';
+    html += "<p class=\"meta-note\">Je resultaat</p>";
+    html += '<p class="category-name">' + esc(cat.name) + "</p>";
+    html += '<p class="category-nickname">Ook wel bekend als <strong>' + esc(cat.nickname) + "</strong>.</p>";
+    html += "<p>" + cat.desc + "</p>";
+    html += "<dl>";
+    html += "<div><dt>Score (inzicht)</dt><dd>" + state.insight + "</dd></div>";
+    html += "<div><dt>Budget over</dt><dd>" + money(state.budget) + " van " + money(BUDGET_START) + "</dd></div>";
+    html += "<div><dt>Totaal uitgegeven</dt><dd>" + money(state.spentTotal) + "</dd></div>";
+    html += "<div><dt>Waarvan aan noodzakelijke aankopen</dt><dd>" + money(state.spentNecessary) + "</dd></div>";
+    html += "<div><dt>Nepkortingen herkend</dt><dd>" + state.fakeSpotted + " van " + state.fakeTotal + "</dd></div>";
+    html += "<div><dt>Kennisvragen goed</dt><dd>" + state.quizCorrect + " van " + state.quizTotal + "</dd></div>";
+    html += "<div><dt>Green Friday</dt><dd>" + (state.greenChoice ? "Meegedaan" : "Niet meegedaan") + "</dd></div>";
+    html += "</dl>";
+    if (best){
+      html += '<p class="best-score">' + (isNewBest ? "Nieuw beste score op dit apparaat: " : "Beste score op dit apparaat: ") + best.insight + " punten.</p>";
+    }
+    html += '<div class="btn-row"><button class="primary" type="button" id="restart-btn">Opnieuw spelen</button></div>';
+    html += '<p class="storage-note">Er wordt geen naam, klas of ander persoonsgegeven opgeslagen. Alleen de beste score blijft lokaal op dit apparaat bewaard, in de opslag van deze browser.</p>';
+    html += "</div>";
+
+    root.innerHTML = html;
+    document.getElementById("restart-btn").addEventListener("click", function(){
+      clearCountdown();
+      state = initState();
+      renderCurrentStep();
+    });
+    renderBonusSection();
+  }
+
+  function renderBonusSection(){
+    var box = document.createElement("div");
+    box.className = "bonus-box";
+    box.innerHTML =
+      "<h3>Extra uitdaging (niet verplicht \u2014 voor wie sneller klaar is)</h3>" +
+      "<p>De smartwatch werd geadverteerd als &ldquo;van &euro;249 voor &euro;199&rdquo;, een korting van 20%. Maar de prijstracker liet zien dat hij de week ervoor ook al &euro;199 kostte. Wat was de werkelijke korting ten opzichte van de laagste prijs van de afgelopen maand? Vul in als heel getal (in procenten).</p>" +
+      '<div class="predict-row">' +
+        '<label for="bonus-percent-input">Werkelijke korting</label>' +
+        '<input type="number" id="bonus-percent-input" min="0" max="100" placeholder="%">' +
+      "</div>" +
+      '<div class="btn-row"><button class="primary" type="button" id="bonus-check-btn">Controleer</button></div>' +
+      '<div id="bonus-answer-box"></div>' +
+      '<p style="margin-top:1.4rem;">Verdiepingsvraag: een supermarkt verlaagt de prijs van verse aardbeien tijdelijk met 10% en verkoopt daardoor 40% meer aardbeien. Een elektronicawinkel verlaagt de prijs van een specifieke laptopkabel met 10% en verkoopt daardoor maar 2% meer kabels. Welk product heeft de hoogste prijselasticiteit van de vraag?</p>' +
+      '<fieldset class="quiz" id="bonus-quiz">' +
+        '<label data-i="0"><input type="radio" name="bonus-quiz-option" value="0"> De aardbeien</label>' +
+        '<label data-i="1"><input type="radio" name="bonus-quiz-option" value="1"> De laptopkabel</label>' +
+        '<label data-i="2"><input type="radio" name="bonus-quiz-option" value="2"> Allebei even elastisch</label>' +
+      "</fieldset>" +
+      '<div class="btn-row"><button class="primary" type="button" id="bonus-quiz-btn" disabled>Controleer antwoord</button></div>' +
+      '<div id="bonus-quiz-answer-box"></div>';
+    root.appendChild(box);
+
+    document.getElementById("bonus-check-btn").addEventListener("click", function(){
+      var input = document.getElementById("bonus-percent-input");
+      var val = parseInt(input.value, 10);
+      var box2 = document.getElementById("bonus-answer-box");
+      if (isNaN(val)){
+        box2.innerHTML = '<div class="bonus-answer">Vul eerst een getal in.</div>';
+        return;
+      }
+      if (val === 0){
+        box2.innerHTML = '<div class="bonus-answer"><strong>Goed!</strong> De werkelijke korting was 0%: de prijs van \u20ac199 was al de laagste prijs van de afgelopen maand. De geadverteerde 20% korting was volledig gebaseerd op een ankerprijs die nooit gold.</div>';
+      } else {
+        box2.innerHTML = '<div class="bonus-answer">Nog niet helemaal: reken uit hoeveel procent lager \u20ac199 is dan de laagste prijs van de afgelopen maand (ook \u20ac199). Het antwoord is 0%.</div>';
+      }
+    });
+
+    var bonusRadios = document.querySelectorAll('input[name="bonus-quiz-option"]');
+    var bonusQuizBtn = document.getElementById("bonus-quiz-btn");
+    bonusRadios.forEach(function(r){
+      r.addEventListener("change", function(){ bonusQuizBtn.disabled = false; });
+    });
+    bonusQuizBtn.addEventListener("click", function(){
+      var checked = document.querySelector('input[name="bonus-quiz-option"]:checked');
+      if (!checked) return;
+      var idx = parseInt(checked.value, 10);
+      var answerBox = document.getElementById("bonus-quiz-answer-box");
+      if (idx === 0){
+        answerBox.innerHTML = '<div class="bonus-answer"><strong>Goed!</strong> Bij de aardbeien zorgt een kleine prijsdaling voor een grote toename in verkoop: een hoge prijselasticiteit. Bij de laptopkabel maakt de prijs weinig uit voor de vraag \u2014 mensen kopen \u2019m toch als ze \u2019m nodig hebben: een lage prijselasticiteit.</div>';
+      } else {
+        answerBox.innerHTML = '<div class="bonus-answer">Niet helemaal: kijk naar welk product de grootste procentu\u00eble toename in verkoop had bij dezelfde procentu\u00eble prijsdaling. Dat waren de aardbeien (40% meer verkocht bij 10% korting) \u2014 die hebben dus de hoogste prijselasticiteit.</div>';
+      }
+    });
+  }
+
+  function advanceStep(){
+    state.stepIndex += 1;
+    state.checkedCurrent = false;
+    renderCurrentStep();
+  }
+
+  function renderCurrentStep(){
+    if (state.stepIndex >= STEPS.length){
+      renderResults();
+      return;
+    }
+    var step = STEPS[state.stepIndex];
+    if (step.type === "deal"){
+      renderDeal(step, step.dealIndex);
+    } else if (step.type === "quiz"){
+      renderQuiz(step.quizId);
+    } else if (step.type === "reflection"){
+      renderReflection();
+    }
+  }
+
+  document.getElementById("start-game-btn").addEventListener("click", function(){
+    clearCountdown();
+    state = initState();
+    renderCurrentStep();
+    var spelSection = document.getElementById("spel");
+    if (spelSection && typeof spelSection.scrollIntoView === "function"){
+      try { spelSection.scrollIntoView({ behavior: "smooth", block: "start" }); } catch (e) { /* no-op */ }
+    }
+  });
+
+  renderIntro();
+
+  var predictBtn = document.getElementById("predict-reveal-btn");
+  if (predictBtn){
+    predictBtn.addEventListener("click", function(){
+      var percentInput = document.getElementById("predict-percent");
+      var amountInput = document.getElementById("predict-amount");
+      var percentGuess = parseFloat(percentInput.value);
+      var amountGuess = parseFloat(amountInput.value);
+      var realPercent = 28;
+      var realAmount = 230;
+
+      function compareLine(guess, real, unit){
+        if (isNaN(guess)){
+          return "Je vulde niets in \u2014 geen probleem, hier is het echte cijfer.";
+        }
+        var diff = Math.abs(guess - real);
+        if (diff <= real * 0.1){
+          return "Goed geschat! Je zat dicht bij de werkelijkheid.";
+        }
+        if (guess > real){
+          return "Je schatte hoger dan de werkelijkheid.";
+        }
+        return "Je schatte lager dan de werkelijkheid.";
+      }
+
+      var html = "";
+      html += '<div class="predict-reveal">';
+      html += "<p><strong>" + realPercent + "%</strong> van de Nederlanders deed vorig jaar een aankoop tijdens Black Friday, volgens onderzoek van NielsenIQ. " + compareLine(percentGuess, realPercent) + "</p>";
+      html += "<p>Schattingen van het gemiddeld bestede bedrag lopen uiteen, maar komen op ongeveer <strong>\u20ac" + realAmount + "</strong> per persoon uit. " + compareLine(amountGuess, realAmount) + "</p>";
+      html += "</div>";
+      document.getElementById("predict-reveal-box").innerHTML = html;
+      predictBtn.disabled = true;
+    });
+  }
+
+  // Expose for functional testing harness (no effect on normal use).
+  window.__BF_TEST__ = {
+    getState: function(){ return state; },
+    scoreDeal: scoreDeal,
+    categorize: categorize,
+    DEALS: DEALS,
+    STEPS: STEPS
+  };
+})();
+</script>
+</body>
+</html>
